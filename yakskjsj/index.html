@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natural Voice TTS — Suara Perempuan Natural AI (Indonesia & Aceh)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- LameJS for authentic MP3 encoding in browser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            950: '#040711',
+                            900: '#080D1A',
+                            800: '#0E172A',
+                            700: '#172542',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #040711;
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .ambient-bg {
+            background: radial-gradient(circle at 50% 0%, rgba(29, 78, 216, 0.16) 0%, rgba(8, 13, 26, 0.6) 45%, #040711 100%);
+        }
+
+        .glass-panel {
+            background: rgba(14, 23, 42, 0.72);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(59, 130, 246, 0.14);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #1e293b;
+            height: 6px;
+            border-radius: 999px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -5px;
+            background-color: #3b82f6;
+            height: 16px;
+            width: 16px;
+            border-radius: 999px;
+            border: 2px solid #eff6ff;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            background-color: #60a5fa;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080d1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+    </style>
+</head>
+<body class="min-h-screen ambient-bg flex flex-col justify-between selection:bg-blue-600 selection:text-white">
+
+    <!-- Top Navigation -->
+    <header class="w-full border-b border-blue-950/60 bg-navy-950/80 backdrop-blur-md sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center shadow-lg shadow-blue-900/40 border border-blue-400/20">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-semibold tracking-tight text-white flex items-center gap-2">
+                        Natural Voice TTS
+                        <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                            ID &amp; Aceh 19yo
+                        </span>
+                    </h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">Sintesis Suara Perempuan Natural (Bahasa Indonesia &amp; Bahasa Aceh)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <span id="engineStatusBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-950/70 text-blue-300 border border-blue-800/40">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Neural Prosody Ready
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+
+        <div class="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+                <h2 class="text-xl sm:text-2xl font-semibold text-white tracking-tight">Studio Suara Perempuan Natural</h2>
+                <p class="text-sm text-slate-400 mt-1">
+                    Suara perempuan usia 19 tahun yang lembut, ramah, mendukung <span class="text-blue-300 font-medium">Bahasa Indonesia</span> &amp; <span class="text-emerald-300 font-medium">Bahasa Aceh</span> dengan jeda napas manusiawi.
+                </p>
+            </div>
+
+            <!-- Mode Bahasa Selector -->
+            <div class="flex items-center gap-2 bg-navy-900/90 p-1.5 rounded-xl border border-slate-800 self-start">
+                <button
+                    id="langBtnAceh"
+                    type="button"
+                    onclick="setLanguageMode('aceh')"
+                    class="px-3 py-1.5 rounded-lg text-xs font-medium transition bg-blue-600 text-white shadow"
+                >
+                    Bahasa Aceh
+                </button>
+                <button
+                    id="langBtnId"
+                    type="button"
+                    onclick="setLanguageMode('id')"
+                    class="px-3 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-slate-200"
+                >
+                    Bahasa Indonesia
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- Left Column: Text Input & Audio Player (7 cols) -->
+            <div class="lg:col-span-7 flex flex-col gap-5">
+                <div class="glass-panel rounded-2xl p-4 sm:p-6 shadow-2xl shadow-black/50">
+                    <!-- Top Label & Preset Pills -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <label for="ttsInput" class="text-xs font-semibold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Teks Kalimat
+                        </label>
+
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button type="button" onclick="loadSampleText('aceh_sapaan')" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-950/90 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/50 transition font-medium">
+                                Peue Haba (Aceh)
+                            </button>
+                            <button type="button" onclick="loadSampleText('aceh_kupie')" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-950/90 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/50 transition font-medium">
+                                Jak Jep Kupi (Aceh)
+                            </button>
+                            <button type="button" onclick="loadSampleText('sapaan')" class="text-xs px-2.5 py-1 rounded-lg bg-navy-800 hover:bg-blue-950/80 text-slate-300 hover:text-blue-300 border border-slate-800 transition">
+                                Sapaan (ID)
+                            </button>
+                            <button type="button" onclick="loadSampleText('cerita')" class="text-xs px-2.5 py-1 rounded-lg bg-navy-800 hover:bg-blue-950/80 text-slate-300 hover:text-blue-300 border border-slate-800 transition">
+                                Santai (ID)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Textarea -->
+                    <div class="relative">
+                        <textarea
+                            id="ttsInput"
+                            rows="6"
+                            maxlength="1200"
+                            placeholder="Ketik kalimat Bahasa Aceh atau Bahasa Indonesia di sini..."
+                            class="w-full rounded-xl bg-navy-950/90 border border-slate-800/90 focus:border-blue-500/70 focus:ring-2 focus:ring-blue-500/20 text-slate-100 placeholder-slate-500 p-4 text-sm sm:text-base leading-relaxed resize-y transition outline-none"
+                        >Assalamualaikum, peue haba rakan mandum? Lon Cut Nadia. Uroe nyoe cuaca di Banda Aceh brat that get, angen pih meupot pelan-pelan. Meunyo rakan na watee luang, jak singgah jep kupi sira tameupoh cakra sapeue.</textarea>
+                    </div>
+
+                    <!-- Bottom Helper Bar -->
+                    <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="insertPunctuation(', ')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
+                                + Koma (Jeda Pendek)
+                            </button>
+                            <button type="button" onclick="insertPunctuation('. ')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
+                                + Titik (Jeda Napas)
+                            </button>
+                            <button type="button" onclick="clearText()" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-red-950/50 text-slate-400 hover:text-red-300 border border-slate-800 transition">
+                                Hapus
+                            </button>
+                        </div>
+                        <div id="charCount" class="font-mono text-slate-400">0 / 1200 karakter</div>
+                    </div>
+
+                    <!-- Status / Error Banner -->
+                    <div id="statusBanner" class="hidden mt-4 rounded-xl p-3.5 text-xs sm:text-sm border flex items-start gap-3 transition-all">
+                        <svg id="statusIcon" class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"></svg>
+                        <div class="flex-1">
+                            <p id="statusTitle" class="font-medium"></p>
+                            <p id="statusMessage" class="text-xs opacity-90 mt-0.5 leading-relaxed"></p>
+                        </div>
+                        <button type="button" onclick="hideBanner()" class="text-slate-400 hover:text-white">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <div class="mt-5">
+                        <button
+                            id="generateBtn"
+                            type="button"
+                            onclick="handleGenerateVoice()"
+                            class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-[0.99] text-white font-semibold text-sm sm:text-base shadow-lg shadow-blue-600/25 border border-blue-400/20 flex items-center justify-center gap-2.5 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                            <svg id="generateIcon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
+                            <span id="generateBtnText">Generate Voice</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Audio Player & Visualizer Card -->
+                <div class="glass-panel rounded-2xl p-4 sm:p-6 shadow-2xl shadow-black/50">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-blue-400">Pemutar Suara</span>
+                            <span id="activeVoiceTag" class="text-xs px-2 py-0.5 rounded-md bg-slate-800/90 text-slate-300 border border-slate-700/60">
+                                Belum ada audio
+                            </span>
+                        </div>
+                        <span id="timeDisplay" class="text-xs font-mono text-slate-400">00:00 / 00:00</span>
+                    </div>
+
+                    <!-- Waveform Canvas Container -->
+                    <div class="relative w-full h-24 rounded-xl bg-navy-950/90 border border-slate-800/80 overflow-hidden flex items-center justify-center mb-4">
+                        <canvas id="waveformCanvas" class="w-full h-full block"></canvas>
+                        <div id="emptyPlayerOverlay" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 text-xs pointer-events-none">
+                            <p>Klik <span class="text-blue-400 font-medium">Generate Voice</span> untuk membuat suara natural</p>
+                        </div>
+                    </div>
+
+                    <!-- Seek Progress Bar -->
+                    <div class="mb-4">
+                        <input
+                            id="seekSlider"
+                            type="range"
+                            min="0"
+                            max="100"
+                            value="0"
+                            step="0.1"
+                            disabled
+                            class="w-full disabled:opacity-40"
+                            aria-label="Durasi Audio"
+                        >
+                    </div>
+
+                    <!-- Player Controls -->
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <button
+                                id="playBtn"
+                                type="button"
+                                onclick="playAudio()"
+                                disabled
+                                class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800/70 disabled:text-slate-500 text-white font-medium text-xs sm:text-sm flex items-center gap-2 transition shadow-md shadow-blue-950/50"
+                            >
+                                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg>
+                                <span>Play</span>
+                            </button>
+
+                            <button
+                                id="pauseBtn"
+                                type="button"
+                                onclick="pauseAudio()"
+                                disabled
+                                class="px-4 py-2.5 rounded-xl bg-navy-800 hover:bg-slate-800 disabled:bg-slate-900/50 disabled:text-slate-600 text-slate-200 border border-slate-700/70 font-medium text-xs sm:text-sm flex items-center gap-2 transition"
+                            >
+                                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                                </svg>
+                                <span>Pause</span>
+                            </button>
+
+                            <button
+                                id="replayBtn"
+                                type="button"
+                                onclick="replayAudio()"
+                                disabled
+                                title="Ulangi dari awal"
+                                class="p-2.5 rounded-xl bg-navy-800 hover:bg-slate-800 disabled:opacity-40 text-slate-300 border border-slate-800 transition"
+                            >
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <button
+                            id="downloadMp3Btn"
+                            type="button"
+                            onclick="downloadMP3()"
+                            disabled
+                            class="px-4 py-2.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 disabled:opacity-40 disabled:pointer-events-none font-medium text-xs sm:text-sm flex items-center gap-2 transition"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            <span id="downloadBtnText">Download MP3</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Clone Voice, Character Selection & Controls (5 cols) -->
+            <div class="lg:col-span-5 flex flex-col gap-5">
+
+                <!-- Clone / Tirukan Suara Sendiri Card -->
+                <div class="glass-panel rounded-2xl p-4 sm:p-6 shadow-2xl shadow-black/50 border border-blue-500/30 relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-semibold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                            Clone / Tirukan Suara Sendiri
+                        </label>
+                        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                            AI Voice Matcher
+                        </span>
+                    </div>
+
+                    <p class="text-xs text-slate-400 leading-relaxed mb-3.5">
+                        Rekam suaramu (5&ndash;15 detik) atau upload audio. AI akan menyesuaikan karakter vokal, frekuensi nada (Hz), dan logat bicaramu (Indonesia maupun Aceh).
+                    </p>
+
+                    <div id="recordingPromptBox" class="hidden mb-3 p-3 rounded-xl bg-blue-950/50 border border-blue-800/50 text-xs text-blue-200">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-semibold text-red-400 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                                Sedang Merekam... (<span id="recordTimer">00:00</span>)
+                            </span>
+                            <span class="text-[11px] text-slate-400">Baca santai:</span>
+                        </div>
+                        <p class="italic text-slate-200 leading-relaxed">
+                            "Assalamualaikum, peue haba rakan? Ini rekaman suara asli aku untuk ditirukan nadanya."
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <button
+                            id="recordMicBtn"
+                            type="button"
+                            onclick="toggleMicRecording()"
+                            class="py-2.5 px-3 rounded-xl bg-navy-800 hover:bg-blue-950/80 text-slate-200 border border-slate-700/80 hover:border-blue-500/50 text-xs font-medium flex items-center justify-center gap-2 transition"
+                        >
+                            <svg class="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                            <span id="recordMicText">Rekam Suara</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onclick="document.getElementById('voiceUploadInput').click()"
+                            class="py-2.5 px-3 rounded-xl bg-navy-800 hover:bg-blue-950/80 text-slate-200 border border-slate-700/80 hover:border-blue-500/50 text-xs font-medium flex items-center justify-center gap-2 transition"
+                        >
+                            <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            <span>Upload Audio</span>
+                        </button>
+                        <input id="voiceUploadInput" type="file" accept="audio/*" class="hidden" onchange="handleVoiceFileUpload(event)">
+                    </div>
+
+                    <div id="userSampleContainer" class="hidden mt-3.5 pt-3.5 border-t border-slate-800/80 space-y-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <span id="sampleFileName" class="text-xs text-slate-300 font-medium truncate">Rekaman_Suara_Saya.webm</span>
+                            <span id="detectedPitchBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 text-blue-300 border border-slate-800">
+                                Siap dianalisis
+                            </span>
+                        </div>
+
+                        <audio id="userSampleAudio" controls class="w-full h-8 rounded-lg opacity-90"></audio>
+
+                        <button
+                            id="analyzeVoiceBtn"
+                            type="button"
+                            onclick="analyzeAndCloneVoice()"
+                            class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-semibold text-xs sm:text-sm shadow-lg shadow-indigo-950/50 border border-indigo-400/30 flex items-center justify-center gap-2 transition disabled:opacity-50"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                            </svg>
+                            <span id="analyzeVoiceText">Analisis &amp; Tirukan Suara Saya</span>
+                        </button>
+
+                        <div id="cloneResultBox" class="hidden p-3 rounded-xl bg-indigo-950/40 border border-indigo-500/30 text-xs text-slate-300 space-y-2">
+                            <div class="font-semibold text-indigo-300 flex items-center justify-between">
+                                <span id="cloneResultTitle">Profil Suara Berhasil Dibuat!</span>
+                                <span id="cloneResultTone" class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-200">Aktif</span>
+                            </div>
+                            <p id="cloneResultDesc" class="text-[11px] text-slate-400 leading-relaxed"></p>
+                            <div class="pt-1.5 border-t border-indigo-800/40 flex items-center justify-between gap-2">
+                                <label for="cloneBaseVoiceSelect" class="text-[11px] text-indigo-200 font-medium">Warna Pita Vokal Dasar:</label>
+                                <select id="cloneBaseVoiceSelect" onchange="changeClonedBaseVoice(this.value)" class="rounded-lg bg-navy-950 border border-indigo-500/40 text-[11px] text-slate-200 px-2 py-1 outline-none focus:border-blue-400">
+                                    <optgroup label="Perempuan (Natural & Jernih)">
+                                        <option value="Kore">Kore (Natural &amp; Tanpa Desah 'H')</option>
+                                        <option value="Sulafat">Sulafat (Hangat &amp; Lembut)</option>
+                                        <option value="Despina">Despina (Halus &amp; Tenang)</option>
+                                        <option value="Zephyr">Zephyr (Cerah &amp; Ramah)</option>
+                                        <option value="Callirrhoe">Callirrhoe (Santai Ngobrol)</option>
+                                    </optgroup>
+                                    <optgroup label="Laki-laki (Natural & Jernih)">
+                                        <option value="Achird">Achird (Muda &amp; Bersahabat)</option>
+                                        <option value="Zubenelgenubi">Zubenelgenubi (Santai Akrab)</option>
+                                        <option value="Puck">Puck (Jernih &amp; Natural)</option>
+                                        <option value="Charon">Charon (Tenang &amp; Dalam)</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Character Selection Card -->
+                <div class="glass-panel rounded-2xl p-4 sm:p-6 shadow-2xl shadow-black/50">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-xs font-semibold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Pilihan Karakter Suara Perempuan
+                        </label>
+                    </div>
+
+                    <div id="voiceCharacterList" class="space-y-2.5"></div>
+                </div>
+
+                <!-- Speed, Breath & Volume Controls Card -->
+                <div class="glass-panel rounded-2xl p-4 sm:p-6 shadow-2xl shadow-black/50 space-y-5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                            </svg>
+                            Pengaturan Suara &amp; Prosodi
+                        </span>
+                    </div>
+
+                    <!-- Speed Slider -->
+                    <div>
+                        <div class="flex items-center justify-between text-xs mb-2">
+                            <label for="speedSlider" class="text-slate-300 font-medium">Kecepatan Bicara (Tempo)</label>
+                            <span id="speedValueLabel" class="px-2 py-0.5 rounded bg-blue-950/90 text-blue-300 border border-blue-800/40 font-mono">
+                                1.00x (Natural Murni)
+                            </span>
+                        </div>
+                        <input id="speedSlider" type="range" min="0.85" max="1.15" step="0.05" value="1.00" class="w-full">
+                        <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+                            <span>0.85x (Santai)</span>
+                            <span>1.00x (Murni)</span>
+                            <span>1.15x (Cepat)</span>
+                        </div>
+                    </div>
+
+                    <!-- Breath & De-Breath Controls -->
+                    <div class="pt-2 border-t border-slate-800/80 space-y-3">
+                        <div>
+                            <div class="flex items-center justify-between text-xs mb-1.5">
+                                <label for="naturalBreathSelect" class="text-slate-300 font-medium flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                                    Jeda Tarikan Napas Manusia
+                                </label>
+                                <select id="naturalBreathSelect" onchange="handleDeBreathChange()" class="rounded-lg bg-blue-950/90 text-blue-300 border border-blue-800/40 px-2.5 py-1 text-xs font-medium outline-none">
+                                    <option value="natural" selected>Natural (Ada Tarikan Napas)</option>
+                                    <option value="soft">Halus (Napas Tipis)</option>
+                                    <option value="off">Tanpa Suara Napas</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between text-xs mb-1.5">
+                                <label for="deBreathSelect" class="text-slate-300 font-medium flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                    Filter Anti-Desah "H" di Ujung Kata
+                                </label>
+                                <select id="deBreathSelect" onchange="handleDeBreathChange()" class="rounded-lg bg-blue-950/90 text-blue-300 border border-blue-800/40 px-2.5 py-1 text-xs font-medium outline-none">
+                                    <option value="balanced" selected>Seimbang (Hapus 'H', Jaga Napas)</option>
+                                    <option value="strong">Kuat (Potong Ekor Kata)</option>
+                                    <option value="off">Nonaktif (Asli)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pitch Slider -->
+                    <div class="pt-2 border-t border-slate-800/80">
+                        <div class="flex items-center justify-between text-xs mb-2">
+                            <label for="pitchSlider" class="text-slate-300 font-medium">Tinggi Nada Vokal (Pitch Match)</label>
+                            <span id="pitchValueLabel" class="px-2 py-0.5 rounded bg-blue-950/90 text-blue-300 border border-blue-800/40 font-mono">
+                                0.0 st (Murni)
+                            </span>
+                        </div>
+                        <input id="pitchSlider" type="range" min="-3.0" max="3.0" step="0.5" value="0.0" class="w-full">
+                    </div>
+
+                    <!-- Volume Slider -->
+                    <div class="pt-2 border-t border-slate-800/80">
+                        <div class="flex items-center justify-between text-xs mb-2">
+                            <label for="volumeSlider" class="text-slate-300 font-medium">Volume Audio</label>
+                            <span id="volumeValueLabel" class="px-2 py-0.5 rounded bg-blue-950/90 text-blue-300 border border-blue-800/40 font-mono">
+                                100%
+                            </span>
+                        </div>
+                        <input id="volumeSlider" type="range" min="0" max="1" step="0.02" value="1" class="w-full">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full border-t border-slate-900 bg-navy-950/80 py-5 mt-8">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+            <p>Natural Voice TTS &mdash; Studio Suara Perempuan Natural (Indonesia &amp; Aceh)</p>
+            <p>Kualitas Audio 24kHz Neural PCM &bull; Ekspor MP3 Langsung</p>
+        </div>
+    </footer>
+
+    <!-- Hidden Audio Element -->
+    <audio id="ttsAudioElement" class="hidden"></audio>
+
+    <script>
+        let ttsInput, generateBtn, generateBtnText, generateIcon, playBtn, pauseBtn, replayBtn, downloadMp3Btn, downloadBtnText;
+        let speedSlider, pitchSlider, volumeSlider, speedValueLabel, pitchValueLabel, volumeValueLabel;
+        let waveformCanvas, emptyPlayerOverlay, timeDisplay, activeVoiceTag, voiceCharacterList;
+        let canvasCtx;
+
+        let audioElement;
+        let audioContext = null;
+        let analyserNode = null;
+        let mediaSourceNode = null;
+        let animationFrameId = null;
+
+        let currentWavUrl = null;
+        let rawOriginalPcm16 = null;
+        let lastPcm16Data = null;
+        let lastSampleRate = 24000;
+        let isGenerating = false;
+
+        let selectedVoiceId = 'cut_nadia';
+        let currentLanguageMode = 'aceh'; // 'aceh' or 'id'
+
+        // Rekam & Clone Suara
+        let isRecordingMic = false;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let recordSeconds = 0;
+        let recordTimerInterval = null;
+        let userVoiceBlob = null;
+        let userVoiceBase64 = null;
+        let userVoiceMimeType = '';
+        let detectedUserPitchHz = null;
+        let userSpectralTilt = 0;
+        let isAnalyzingVoice = false;
+
+        const FEMALE_VOICES = [
+            {
+                id: 'cut_nadia',
+                name: 'Cut Nadia (19 Tahun • Aceh & ID)',
+                badge: 'Utama • Logat Aceh & ID Natural',
+                geminiVoice: 'Kore',
+                description: 'Suara gadis Aceh usia 19 tahun yang lembut, ramah, fasih melafalkan Bahasa Aceh (peue haba, lon, rakan) maupun Bahasa Indonesia tanpa desah "-hhh".',
+                stylePrompt: 'Speak as a warm, friendly, natural 19-year-old Acehnese/Indonesian young woman. Pronounce Acehnese words (such as peue haba, lon, droeneuh, uroe nyoe, jep kupi) with authentic, soft, melodic Aceh rhythm and clean vowels without any robotic stiffness or trailing breathy sigh'
+            },
+            {
+                id: 'nadia',
+                name: 'Nadia (19 Tahun)',
+                badge: 'Jernih & Bernapas Alami',
+                geminiVoice: 'Kore',
+                description: 'Vokal perempuan muda yang jernih tanpa bunyi "-hhh" di ujung kata, dengan dinamika intonasi harian yang hidup dan ramah.',
+                stylePrompt: 'Speak in a completely natural, warm, expressive everyday 19-year-old Indonesian young woman voice with lively conversational intonation. Take subtle human intake breaths before new sentences, keeping word endings clean'
+            },
+            {
+                id: 'tiara',
+                name: 'Cut Tiara (19 Tahun)',
+                badge: 'Hangat & Lembut',
+                geminiVoice: 'Sulafat',
+                description: 'Karakter vokal perempuan muda yang hangat dan akrab, cocok untuk obrolan Bahasa Aceh maupun cerita santai Bahasa Indonesia.',
+                stylePrompt: 'Speak in a warm, soft, friendly 19-year-old Acehnese and Indonesian female voice with natural human intake breaths between sentences and clean vowel endings'
+            },
+            {
+                id: 'alya',
+                name: 'Alya (19 Tahun)',
+                badge: 'Santai & Akrab',
+                geminiVoice: 'Callirrhoe',
+                description: 'Intonasi mengalir santai seperti mengobrol langsung dengan teman dekat, memiliki ritme napas manusia asli.',
+                stylePrompt: 'Speak in a casual, lively, easy-going 19-year-old young woman voice like talking to a close friend, with gentle natural intake breaths at pauses and clean vowel endings'
+            },
+            {
+                id: 'kirana',
+                name: 'Kirana (19 Tahun)',
+                badge: 'Tenang & Halus',
+                geminiVoice: 'Despina',
+                description: 'Nada bicara tenang, sopan, dan ramah dengan tarikan napas halus di sela kalimat.',
+                stylePrompt: 'Speak in a smooth, calm, expressive 19-year-old young woman voice with subtle human breathing at punctuation pauses and clean vowel endings'
+            }
+        ];
+
+        const SAMPLE_TEXTS = {
+            aceh_sapaan: "Assalamualaikum, peue haba rakan mandum? Lon Cut Nadia. Uroe nyoe cuaca di Banda Aceh brat that get, angen pih meupot pelan-pelan. Meunyo rakan na watee luang, jak singgah jep kupi sira tameupoh cakra sapeue.",
+            aceh_kupie: "Oya rakan, bek tuwoe jaga kesehatan beh. Meunyo ka leuh buet uroe nyoe, pioh siat, jep ie suum atawa kupi Aceh mangat teuga lom tuboh. Saleum manis nibak lon keu syedara mandum di gampong.",
+            sapaan: "Halo, selamat datang di Natural Voice. Aku Nadia. Hari ini cuaca terasa tenang sekali ya, cocok untuk bersantai sejenak sambil mendengarkan cerita. Kalau kamu punya kalimat Bahasa Aceh atau Indonesia, silakan tulis di kolom ini ya.",
+            cerita: "Jujur, kadang kita cuma butuh istirahat sebentar dari rutinitas yang padat. Duduk santai sambil minum teh hangat, tarik napas pelan-pelan, lalu nikmati waktu tenang sore ini. Tidak perlu terburu-buru, semuanya pasti selesai pada waktunya."
+        };
+
+        function setLanguageMode(mode) {
+            currentLanguageMode = mode;
+            const btnAceh = document.getElementById('langBtnAceh');
+            const btnId = document.getElementById('langBtnId');
+            if (mode === 'aceh') {
+                btnAceh.className = 'px-3 py-1.5 rounded-lg text-xs font-medium transition bg-blue-600 text-white shadow';
+                btnId.className = 'px-3 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-slate-200';
+                loadSampleText('aceh_sapaan');
+                selectVoice('cut_nadia');
+            } else {
+                btnId.className = 'px-3 py-1.5 rounded-lg text-xs font-medium transition bg-blue-600 text-white shadow';
+                btnAceh.className = 'px-3 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-slate-200';
+                loadSampleText('sapaan');
+                selectVoice('nadia');
+            }
+        }
+
+        function renderVoiceCharacters() {
+            if (!voiceCharacterList) return;
+            voiceCharacterList.innerHTML = FEMALE_VOICES.map((voice) => {
+                const isSelected = voice.id === selectedVoiceId;
+                return `
+                    <div
+                        onclick="selectVoice('${voice.id}')"
+                        class="cursor-pointer rounded-xl p-3.5 border transition-all ${
+                            isSelected
+                                ? 'bg-blue-950/60 border-blue-500/70 shadow-md shadow-blue-950/50'
+                                : 'bg-navy-950/60 border-slate-800/80 hover:border-slate-700'
+                        }"
+                    >
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-4 h-4 rounded-full border flex items-center justify-center ${
+                                    isSelected ? 'border-blue-400 bg-blue-500/20' : 'border-slate-600'
+                                }">
+                                    ${isSelected ? '<div class="w-2 h-2 rounded-full bg-blue-400"></div>' : ''}
+                                </div>
+                                <span class="text-xs sm:text-sm font-semibold text-white">${voice.name}</span>
+                            </div>
+                            <span class="text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                                isSelected
+                                    ? 'bg-blue-500/20 text-blue-300 border border-blue-400/30'
+                                    : 'bg-slate-900 text-slate-400 border border-slate-800'
+                            }">
+                                ${voice.badge}
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1.5 pl-6 leading-relaxed">${voice.description}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectVoice(voiceId) {
+            selectedVoiceId = voiceId;
+            renderVoiceCharacters();
+        }
+
+        function loadSampleText(key) {
+            if (!SAMPLE_TEXTS[key]) return;
+            ttsInput.value = SAMPLE_TEXTS[key];
+            updateCharCount();
+        }
+
+        function insertPunctuation(punct) {
+            const start = ttsInput.selectionStart;
+            const end = ttsInput.selectionEnd;
+            const text = ttsInput.value;
+            ttsInput.value = text.substring(0, start) + punct + text.substring(end);
+            ttsInput.focus();
+            ttsInput.selectionStart = ttsInput.selectionEnd = start + punct.length;
+            updateCharCount();
+        }
+
+        function clearText() {
+            ttsInput.value = '';
+            updateCharCount();
+            ttsInput.focus();
+        }
+
+        function updateCharCount() {
+            const len = ttsInput ? ttsInput.value.length : 0;
+            const el = document.getElementById('charCount');
+            if (el) el.textContent = `${len} / 1200 karakter`;
+        }
+
+        function showBanner(type, title, message) {
+            const banner = document.getElementById('statusBanner');
+            const icon = document.getElementById('statusIcon');
+            const titleEl = document.getElementById('statusTitle');
+            const msgEl = document.getElementById('statusMessage');
+
+            banner.classList.remove('hidden', 'bg-red-950/60', 'border-red-800/60', 'text-red-200', 'bg-blue-950/60', 'border-blue-800/60', 'text-blue-200', 'bg-emerald-950/60', 'border-emerald-800/60', 'text-emerald-200');
+
+            if (type === 'error') {
+                banner.classList.add('bg-red-950/60', 'border-red-800/60', 'text-red-200');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
+            } else if (type === 'success') {
+                banner.classList.add('bg-emerald-950/60', 'border-emerald-800/60', 'text-emerald-200');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />';
+            } else {
+                banner.classList.add('bg-blue-950/60', 'border-blue-800/60', 'text-blue-200');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
+            }
+
+            titleEl.textContent = title;
+            msgEl.textContent = message;
+        }
+
+        function hideBanner() {
+            document.getElementById('statusBanner').classList.add('hidden');
+        }
+
+        // ==========================================
+        // PANDUAN FONETIK BAHASA ACEH & PROSODI ALAMI
+        // ==========================================
+        function normalizeAcehAndIndonesianProsody(rawText) {
+            let text = rawText.trim().replace(/\s+/g, ' ');
+            // Rapikan tanda baca agar jeda napas koma dan titik konsisten
+            text = text.replace(/\s*,\s*/g, ', ');
+            text = text.replace(/\s*\.\s*/g, '. ');
+            if (!/[.!?]$/.test(text)) {
+                text += '.';
+            }
+            return text;
+        }
+
+        function isLikelyAcehnese(text) {
+            const acehKeywords = /\b(peue|haba|lon|ulon|droeneuh|droeneh|rakan|uroe|nyoe|meunyo|jak|jep|kupi|gampong|teumpat|mandum|bek|tuwoe|that|jeut|keu|geutanyong|syedara|beh|pih|sira|tameupoh)\b/i;
+            return currentLanguageMode === 'aceh' || acehKeywords.test(text);
+        }
+
+        // ==========================================
+        // DSP ANTI-DESAH "H" & TARIKAN NAPAS MANUSIA
+        // ==========================================
+        function cleanTrailingBreathAndMatchTimbre(pcm16, sampleRate) {
+            const deBreathEl = document.getElementById('deBreathSelect');
+            const mode = deBreathEl ? deBreathEl.value : 'balanced';
+            const out = new Int16Array(pcm16.length);
+            for (let i = 0; i < pcm16.length; i++) out[i] = pcm16[i];
+
+            if (mode === 'off') return out;
+
+            const frameSize = Math.floor(sampleRate * 0.015); // 15ms frame
+            const totalFrames = Math.floor(out.length / frameSize);
+            const rmsArr = new Float32Array(totalFrames);
+            const zcrArr = new Float32Array(totalFrames);
+
+            let maxRms = 1;
+            for (let f = 0; f < totalFrames; f++) {
+                let sumSq = 0;
+                let zeroCrossings = 0;
+                const start = f * frameSize;
+                for (let i = 0; i < frameSize; i++) {
+                    const s = out[start + i];
+                    sumSq += s * s;
+                    if (i > 0 && ((s >= 0 && out[start + i - 1] < 0) || (s < 0 && out[start + i - 1] >= 0))) {
+                        zeroCrossings++;
+                    }
+                }
+                rmsArr[f] = Math.sqrt(sumSq / frameSize);
+                if (rmsArr[f] > maxRms) maxRms = rmsArr[f];
+                zcrArr[f] = zeroCrossings / frameSize;
+            }
+
+            // Redam desah ekor kata (ketika energi turun drastis dan ZCR tinggi/unvoiced 'h')
+            for (let f = 2; f < totalFrames - 1; f++) {
+                const prevRms = rmsArr[f - 2];
+                const curRms = rmsArr[f];
+                const nextRms = rmsArr[f + 1];
+                const isFallingTail = (curRms < prevRms * 0.55) && (curRms < maxRms * 0.18) && (nextRms <= curRms * 1.15);
+                const isHighFreqSigh = zcrArr[f] > 0.18;
+
+                if (isFallingTail && isHighFreqSigh) {
+                    const atten = mode === 'strong' ? 0.15 : 0.42;
+                    const start = f * frameSize;
+                    for (let i = 0; i < frameSize; i++) {
+                        out[start + i] = Math.round(out[start + i] * atten);
+                    }
+                }
+            }
+
+            // Fade-out lembut 80ms terakhir agar tidak ada desah 'h' di akhir kalimat
+            const tailSamples = Math.min(out.length, Math.floor(sampleRate * 0.08));
+            const startTail = out.length - tailSamples;
+            for (let i = 0; i < tailSamples; i++) {
+                const ratio = 1 - (i / tailSamples);
+                out[startTail + i] = Math.round(out[startTail + i] * ratio);
+            }
+
+            return out;
+        }
+
+        function handleDeBreathChange() {
+            if (rawOriginalPcm16) {
+                rebuildAudioWithPitchShift();
+            }
+        }
+
+        // ==========================================
+        // GENERATE VOICE VIA GEMINI 2.5 FLASH TTS
+        // ==========================================
+        async function fetchGeminiWithBackoff(url, payload, maxRetries = 4) {
+            const delays = [1000, 2000, 4000, 8000];
+            for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) {
+                        if (attempt < maxRetries && (response.status === 429 || response.status >= 500)) {
+                            await new Promise(r => setTimeout(r, delays[attempt]));
+                            continue;
+                        }
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(errData?.error?.message || `HTTP Error ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (err) {
+                    if (attempt === maxRetries) throw err;
+                    await new Promise(r => setTimeout(r, delays[attempt]));
+                }
+            }
+        }
+
+        async function handleGenerateVoice() {
+            if (isGenerating) return;
+            const rawText = ttsInput.value.trim();
+            if (!rawText) {
+                showBanner('error', 'Teks Masih Kosong', 'Silakan masukkan kalimat Bahasa Aceh atau Bahasa Indonesia terlebih dahulu.');
+                return;
+            }
+
+            hideBanner();
+            isGenerating = true;
+            generateBtn.disabled = true;
+            generateBtnText.textContent = 'Sedang Membuat Suara Natural...';
+            generateIcon.classList.add('animate-spin');
+
+            try {
+                const voiceObj = FEMALE_VOICES.find(v => v.id === selectedVoiceId) || FEMALE_VOICES[0];
+                const formattedText = normalizeAcehAndIndonesianProsody(rawText);
+                const breathMode = document.getElementById('naturalBreathSelect')?.value || 'natural';
+                const useAcehGuide = isLikelyAcehnese(formattedText);
+
+                let breathInstruction = 'Take subtle, realistic human intake breaths before new sentences after periods and commas, while keeping vowel endings clean without any trailing -hhh sigh.';
+                if (breathMode === 'soft') {
+                    breathInstruction = 'Use very soft, gentle pauses at commas and periods with clean vowel endings.';
+                } else if (breathMode === 'off') {
+                    breathInstruction = 'Pause cleanly at commas and periods with zero breath noise and crisp vowel endings.';
+                }
+
+                const acehPhoneticGuide = useAcehGuide
+                    ? 'The text includes Acehnese language (Bahasa Aceh). Pronounce Acehnese words naturally like a native 19-year-old girl from Banda Aceh: "peue" sounds like "puh-eh", "lon/ulon" sounds like "lohn", "droeneuh" sounds like "droh-nuh", "uroe nyoe" sounds like "oo-roh nyoh", "kupi" sounds like "koo-pee", with warm conversational Acehnese melody.'
+                    : 'Pronounce Indonesian words naturally like a native 19-year-old Indonesian young woman chatting in daily life.';
+
+                const promptText = `${voiceObj.stylePrompt}. ${acehPhoneticGuide} ${breathInstruction}\n\nRead this aloud naturally:\n"${formattedText}"`;
+
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{
+                        parts: [{ text: promptText }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: {
+                                    voiceName: voiceObj.geminiVoice
+                                }
+                            }
+                        }
+                    },
+                    model: "gemini-2.5-flash-preview-tts"
+                };
+
+                const result = await fetchGeminiWithBackoff(apiUrl, payload);
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType || "audio/L16;rate=24000";
+
+                if (!audioData) {
+                    throw new Error('Server tidak mengembalikan data audio. Coba ulangi beberapa saat lagi.');
+                }
+
+                const rateMatch = mimeType.match(/rate=(\d+)/);
+                lastSampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+
+                const pcmBuffer = base64ToArrayBuffer(audioData);
+                rawOriginalPcm16 = new Int16Array(pcmBuffer);
+
+                const semitones = parseFloat(pitchSlider.value || 0);
+                lastPcm16Data = applyPitchShiftToPcm(rawOriginalPcm16, semitones);
+
+                const wavBlob = pcmToWav(lastPcm16Data, lastSampleRate);
+                if (currentWavUrl) URL.revokeObjectURL(currentWavUrl);
+                currentWavUrl = URL.createObjectURL(wavBlob);
+
+                audioElement.src = currentWavUrl;
+                audioElement.volume = parseFloat(volumeSlider.value || 1);
+                audioElement.load();
+
+                activeVoiceTag.textContent = voiceObj.name;
+                emptyPlayerOverlay.classList.add('hidden');
+                playBtn.disabled = false;
+                pauseBtn.disabled = false;
+                replayBtn.disabled = false;
+                downloadMp3Btn.disabled = false;
+                document.getElementById('seekSlider').disabled = false;
+
+                audioElement.onloadedmetadata = () => {
+                    applyPlaybackSpeed(parseFloat(speedSlider.value || 1.0));
+                    updateTimeUI();
+                    playAudio();
+                };
+
+            } catch (error) {
+                showBanner('error', 'Gagal Membuat Suara', error.message || 'Terjadi kesalahan saat menghubungi server TTS.');
+            } finally {
+                isGenerating = false;
+                generateBtn.disabled = false;
+                generateBtnText.textContent = 'Generate Voice';
+                generateIcon.classList.remove('animate-spin');
+            }
+        }
+
+        // ==========================================
+        // PEMUTAR AUDIO, WAV & MP3 ENCODER
+        // ==========================================
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcm16, sampleRate) {
+            const numChannels = 1;
+            const bitsPerSample = 16;
+            const byteRate = sampleRate * numChannels * (bitsPerSample / 8);
+            const blockAlign = numChannels * (bitsPerSample / 8);
+            const dataSize = pcm16.length * 2;
+            const buffer = new ArrayBuffer(44 + dataSize);
+            const view = new DataView(buffer);
+
+            function writeString(offset, str) {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset + i, str.charCodeAt(i));
+                }
+            }
+
+            writeString(0, 'RIFF');
+            view.setUint32(4, 36 + dataSize, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bitsPerSample, true);
+            writeString(36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            let offset = 44;
+            for (let i = 0; i < pcm16.length; i++, offset += 2) {
+                view.setInt16(offset, pcm16[i], true);
+            }
+
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        function playAudio() {
+            if (!audioElement || !audioElement.src) return;
+            setupAudioVisualizer();
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            applyPlaybackSpeed(parseFloat(speedSlider.value || 1.0));
+            audioElement.play().then(() => {
+                playBtn.classList.add('ring-2', 'ring-blue-400');
+                startVisualizerLoop();
+            }).catch(() => {});
+        }
+
+        function pauseAudio() {
+            if (!audioElement) return;
+            audioElement.pause();
+            playBtn.classList.remove('ring-2', 'ring-blue-400');
+        }
+
+        function replayAudio() {
+            if (!audioElement || !audioElement.src) return;
+            audioElement.currentTime = 0;
+            playAudio();
+        }
+
+        function formatTime(sec) {
+            if (!sec || isNaN(sec)) return '00:00';
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        function updateTimeUI() {
+            if (!audioElement) return;
+            const cur = formatTime(audioElement.currentTime);
+            const dur = formatTime(audioElement.duration);
+            timeDisplay.textContent = `${cur} / ${dur}`;
+        }
+
+        function downloadMP3() {
+            if (!lastPcm16Data) return;
+            try {
+                downloadBtnText.textContent = 'Mengonversi MP3...';
+                setTimeout(() => {
+                    const mp3encoder = new lamejs.Mp3Encoder(1, lastSampleRate, 128);
+                    const mp3Data = [];
+                    const sampleBlockSize = 1152;
+
+                    for (let i = 0; i < lastPcm16Data.length; i += sampleBlockSize) {
+                        const sampleChunk = lastPcm16Data.subarray(i, i + sampleBlockSize);
+                        const mp3buf = mp3encoder.encodeBuffer(sampleChunk);
+                        if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                    }
+                    const mp3buf = mp3encoder.flush();
+                    if (mp3buf.length > 0) mp3Data.push(mp3buf);
+
+                    const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `NaturalVoice_${selectedVoiceId}_${Date.now()}.mp3`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    downloadBtnText.textContent = 'Download MP3';
+                }, 50);
+            } catch (e) {
+                downloadBtnText.textContent = 'Download MP3';
+                showBanner('error', 'Gagal Ekspor MP3', 'Terjadi kesalahan saat mengonversi audio ke MP3.');
+            }
+        }
+
+        // ==========================================
+        // VISUALIZER GELOMBANG SUARA
+        // ==========================================
+        function resizeCanvas() {
+            if (!waveformCanvas) return;
+            const rect = waveformCanvas.parentElement.getBoundingClientRect();
+            waveformCanvas.width = rect.width || 500;
+            waveformCanvas.height = rect.height || 96;
+            if (!audioElement || audioElement.paused) {
+                drawIdleWaveform();
+            }
+        }
+
+        function drawIdleWaveform() {
+            if (!canvasCtx || !waveformCanvas) return;
+            const w = waveformCanvas.width;
+            const h = waveformCanvas.height;
+            canvasCtx.clearRect(0, 0, w, h);
+
+            const barCount = 48;
+            const step = w / barCount;
+            for (let i = 0; i < barCount; i++) {
+                const x = i * step + step * 0.25;
+                const barH = 6 + Math.sin(i * 0.35) * 4;
+                canvasCtx.fillStyle = 'rgba(59, 130, 246, 0.22)';
+                canvasCtx.beginPath();
+                canvasCtx.roundRect(x, (h - barH) / 2, step * 0.5, barH, 4);
+                canvasCtx.fill();
+            }
+        }
+
+        function setupAudioVisualizer() {
+            if (audioContext) return;
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                audioContext = new AudioCtx();
+                analyserNode = audioContext.createAnalyser();
+                analyserNode.fftSize = 128;
+                mediaSourceNode = audioContext.createMediaElementSource(audioElement);
+                mediaSourceNode.connect(analyserNode);
+                analyserNode.connect(audioContext.destination);
+            } catch (e) {}
+        }
+
+        function startVisualizerLoop() {
+            if (!analyserNode || !canvasCtx) return;
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+            const bufferLength = analyserNode.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function renderFrame() {
+                if (audioElement.paused || audioElement.ended) {
+                    drawIdleWaveform();
+                    return;
+                }
+                animationFrameId = requestAnimationFrame(renderFrame);
+                analyserNode.getByteFrequencyData(dataArray);
+
+                const w = waveformCanvas.width;
+                const h = waveformCanvas.height;
+                canvasCtx.clearRect(0, 0, w, h);
+
+                const barCount = 48;
+                const step = w / barCount;
+                for (let i = 0; i < barCount; i++) {
+                    const val = dataArray[i % bufferLength] || 0;
+                    const barH = Math.max(6, (val / 255) * (h * 0.8));
+                    const x = i * step + step * 0.2;
+                    const grad = canvasCtx.createLinearGradient(0, (h - barH) / 2, 0, (h + barH) / 2);
+                    grad.addColorStop(0, '#60a5fa');
+                    grad.addColorStop(1, '#2563eb');
+                    canvasCtx.fillStyle = grad;
+                    canvasCtx.beginPath();
+                    canvasCtx.roundRect(x, (h - barH) / 2, step * 0.6, barH, 4);
+                    canvasCtx.fill();
+                }
+            }
+            renderFrame();
+        }
+
+        // ==========================================
+        // CLONE / TIRUKAN SUARA SENDIRI (MIC & UPLOAD)
+        // ==========================================
+        async function toggleMicRecording() {
+            const btn = document.getElementById('recordMicBtn');
+            const textEl = document.getElementById('recordMicText');
+            const promptBox = document.getElementById('recordingPromptBox');
+
+            if (isRecordingMic) {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                }
+                isRecordingMic = false;
+                clearInterval(recordTimerInterval);
+                promptBox.classList.add('hidden');
+                textEl.textContent = 'Rekam Suara';
+                btn.classList.remove('bg-red-950/80', 'border-red-500/60');
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                recordedChunks = [];
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    stream.getTracks().forEach(t => t.stop());
+                    const mimeType = mediaRecorder.mimeType || 'audio/webm';
+                    const blob = new Blob(recordedChunks, { type: mimeType });
+                    await processUserVoiceSample(blob, 'Rekaman_Suara_Saya.webm');
+                };
+
+                mediaRecorder.start();
+                isRecordingMic = true;
+                recordSeconds = 0;
+                document.getElementById('recordTimer').textContent = '00:00';
+                promptBox.classList.remove('hidden');
+                textEl.textContent = 'Stop Rekam';
+                btn.classList.add('bg-red-950/80', 'border-red-500/60');
+
+                recordTimerInterval = setInterval(() => {
+                    recordSeconds++;
+                    const s = String(recordSeconds % 60).padStart(2, '0');
+                    const m = String(Math.floor(recordSeconds / 60)).padStart(2, '0');
+                    document.getElementById('recordTimer').textContent = `${m}:${s}`;
+                    if (recordSeconds >= 15) {
+                        toggleMicRecording();
+                    }
+                }, 1000);
+            } catch (err) {
+                showBanner('error', 'Akses Mikrofon Ditolak', 'Pastikan izin mikrofon diaktifkan pada browser atau gunakan tombol Upload Audio.');
+            }
+        }
+
+        async function handleVoiceFileUpload(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            await processUserVoiceSample(file, file.name);
+        }
+
+        async function processUserVoiceSample(blob, fileName) {
+            userVoiceBlob = blob;
+            userVoiceMimeType = blob.type || 'audio/webm';
+
+            const sampleContainer = document.getElementById('userSampleContainer');
+            const sampleAudio = document.getElementById('userSampleAudio');
+            const sampleNameEl = document.getElementById('sampleFileName');
+            const pitchBadge = document.getElementById('detectedPitchBadge');
+
+            sampleContainer.classList.remove('hidden');
+            sampleNameEl.textContent = fileName;
+            sampleAudio.src = URL.createObjectURL(blob);
+
+            // Hitung frekuensi pitch (Hz) suara pengguna dengan Web Audio API
+            try {
+                const arrayBuf = await blob.arrayBuffer();
+                const tempCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const audioBuf = await tempCtx.decodeAudioData(arrayBuf);
+                const channelData = audioBuf.getChannelData(0);
+                detectedUserPitchHz = estimateFundamentalPitchHz(channelData, audioBuf.sampleRate);
+                tempCtx.close();
+
+                if (detectedUserPitchHz) {
+                    pitchBadge.textContent = `Pitch: ~${Math.round(detectedUserPitchHz)} Hz`;
+                } else {
+                    pitchBadge.textContent = 'Audio Siap';
+                }
+            } catch (e) {
+                pitchBadge.textContent = 'Audio Siap';
+            }
+
+            // Konversi ke base64 untuk analisis multimodal Gemini
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result.split(',')[1];
+                userVoiceBase64 = base64String;
+            };
+            reader.readAsDataURL(blob);
+        }
+
+        function estimateFundamentalPitchHz(samples, sampleRate) {
+            const frameLen = Math.min(samples.length, Math.floor(sampleRate * 0.06));
+            const startOffset = Math.floor(samples.length * 0.25);
+            if (startOffset + frameLen >= samples.length) return 210;
+
+            const minLag = Math.floor(sampleRate / 350);
+            const maxLag = Math.floor(sampleRate / 85);
+            let bestLag = minLag;
+            let bestCorr = -1;
+
+            for (let lag = minLag; lag <= maxLag; lag++) {
+                let corr = 0;
+                for (let i = 0; i < frameLen - lag; i++) {
+                    corr += samples[startOffset + i] * samples[startOffset + i + lag];
+                }
+                if (corr > bestCorr) {
+                    bestCorr = corr;
+                    bestLag = lag;
+                }
+            }
+            return sampleRate / bestLag;
+        }
+
+        async function analyzeAndCloneVoice() {
+            if (!userVoiceBase64 || isAnalyzingVoice) return;
+            isAnalyzingVoice = true;
+            const btn = document.getElementById('analyzeVoiceBtn');
+            const textEl = document.getElementById('analyzeVoiceText');
+            btn.disabled = true;
+            textEl.textContent = 'Menganalisis Karakter Suaramu...';
+
+            try {
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [
+                            {
+                                text: `Analisis rekaman suara manusia ini. Tentukan:
+1. Apakah warna vokalnya perempuan atau laki-laki, dan pilih 1 baseVoice Gemini TTS yang paling mirip dan bersih tanpa desah: untuk perempuan pilih antara ["Kore", "Sulafat", "Despina", "Zephyr", "Callirrhoe"], untuk laki-laki pilih antara ["Achird", "Zubenelgenubi", "Puck", "Charon"].
+2. Buat "stylePrompt" dalam bahasa Inggris untuk menginstruksikan TTS menirukan cara bicara, kehangatan, tempo, dan intonasi orang tersebut secara natural tanpa suara desah 'h' di ujung kata.
+3. Buat ringkasan singkat Bahasa Indonesia ("summaryId") tentang karakter suara pengguna.`
+                            },
+                            {
+                                inlineData: {
+                                    mimeType: userVoiceMimeType.split(';')[0] || "audio/webm",
+                                    data: userVoiceBase64
+                                }
+                            }
+                        ]
+                    }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                gender: { type: "STRING" },
+                                baseVoice: { type: "STRING" },
+                                recommendedSpeed: { type: "NUMBER" },
+                                stylePrompt: { type: "STRING" },
+                                summaryId: { type: "STRING" }
+                            },
+                            propertyOrdering: ["gender", "baseVoice", "recommendedSpeed", "stylePrompt", "summaryId"]
+                        }
+                    }
+                };
+
+                const res = await fetchGeminiWithBackoff(apiUrl, payload);
+                const jsonText = res?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+                const parsed = JSON.parse(jsonText);
+
+                const chosenBase = parsed.baseVoice || 'Kore';
+                const clonedProfile = {
+                    id: 'cloned_user',
+                    name: 'Suara Saya (AI Clone)',
+                    badge: `Clone • ${detectedUserPitchHz ? Math.round(detectedUserPitchHz) + ' Hz' : 'Matched'}`,
+                    geminiVoice: chosenBase,
+                    description: parsed.summaryId || 'Profil suara hasil analisis rekaman pribadimu dengan penyesuaian nada & intonasi.',
+                    stylePrompt: (parsed.stylePrompt || 'Speak in a natural, conversational human voice matching the user timbre') + '. Keep vowel endings clean without any trailing breathy sigh.'
+                };
+
+                const existingIdx = FEMALE_VOICES.findIndex(v => v.id === 'cloned_user');
+                if (existingIdx >= 0) {
+                    FEMALE_VOICES[existingIdx] = clonedProfile;
+                } else {
+                    FEMALE_VOICES.unshift(clonedProfile);
+                }
+
+                selectedVoiceId = 'cloned_user';
+                renderVoiceCharacters();
+
+                const selectEl = document.getElementById('cloneBaseVoiceSelect');
+                if (selectEl) selectEl.value = chosenBase;
+
+                const resultBox = document.getElementById('cloneResultBox');
+                const descEl = document.getElementById('cloneResultDesc');
+                resultBox.classList.remove('hidden');
+                descEl.textContent = clonedProfile.description;
+
+                showBanner('success', 'Karakter Suaramu Berhasil Ditirukan!', 'Profil "Suara Saya (AI Clone)" telah dipilih. Klik Generate Voice untuk mencoba.');
+            } catch (err) {
+                showBanner('error', 'Gagal Menganalisis Rekaman Suara', err.message || 'Pastikan rekaman terdengar jelas lalu coba lagi.');
+            } finally {
+                isAnalyzingVoice = false;
+                btn.disabled = false;
+                textEl.textContent = 'Analisis & Tirukan Suara Saya';
+            }
+        }
+
+        function changeClonedBaseVoice(newVoiceName) {
+            const idx = FEMALE_VOICES.findIndex(v => v.id === 'cloned_user');
+            if (idx >= 0) {
+                FEMALE_VOICES[idx].geminiVoice = newVoiceName;
+                selectedVoiceId = 'cloned_user';
+                renderVoiceCharacters();
+            }
+        }
+
+        // ==========================================
+        // PITCH SHIFT, PLAYBACK SPEED & INIT APP
+        // ==========================================
+        function applyPitchShiftToPcm(pcm16, semitones) {
+            const cleanedPcm = cleanTrailingBreathAndMatchTimbre(pcm16, lastSampleRate);
+            if (!semitones || Math.abs(semitones) < 0.05) {
+                return cleanedPcm;
+            }
+            const factor = Math.pow(2, semitones / 12);
+            const newLength = Math.floor(cleanedPcm.length / factor);
+            const shifted = new Int16Array(newLength);
+            for (let i = 0; i < newLength; i++) {
+                const srcIdx = i * factor;
+                const idx0 = Math.floor(srcIdx);
+                const idx1 = Math.min(cleanedPcm.length - 1, idx0 + 1);
+                const frac = srcIdx - idx0;
+                shifted[i] = Math.round(cleanedPcm[idx0] * (1 - frac) + cleanedPcm[idx1] * frac);
+            }
+            return shifted;
+        }
+
+        function rebuildAudioWithPitchShift() {
+            if (!rawOriginalPcm16) return;
+            const wasPlaying = audioElement && !audioElement.paused;
+            const prevTime = audioElement ? audioElement.currentTime : 0;
+
+            const semitones = parseFloat(pitchSlider.value || 0);
+            lastPcm16Data = applyPitchShiftToPcm(rawOriginalPcm16, semitones);
+            const wavBlob = pcmToWav(lastPcm16Data, lastSampleRate);
+
+            if (currentWavUrl) URL.revokeObjectURL(currentWavUrl);
+            currentWavUrl = URL.createObjectURL(wavBlob);
+
+            audioElement.src = currentWavUrl;
+            audioElement.load();
+            audioElement.onloadedmetadata = () => {
+                applyPlaybackSpeed(parseFloat(speedSlider.value || 1.0));
+                audioElement.currentTime = Math.min(prevTime, audioElement.duration || 0);
+                updateTimeUI();
+                if (wasPlaying) playAudio();
+            };
+        }
+
+        function applyPlaybackSpeed(rate) {
+            if (!audioElement) return;
+            const semitones = parseFloat(pitchSlider ? pitchSlider.value : 0);
+            const pitchCompensation = Math.pow(2, semitones / 12);
+            audioElement.preservesPitch = true;
+            audioElement.mozPreservesPitch = true;
+            audioElement.webkitPreservesPitch = true;
+            audioElement.playbackRate = Math.max(0.5, Math.min(2.0, rate / (pitchCompensation !== 1 ? 1 : 1)));
+        }
+
+        function initApp() {
+            ttsInput = document.getElementById('ttsInput');
+            generateBtn = document.getElementById('generateBtn');
+            generateBtnText = document.getElementById('generateBtnText');
+            generateIcon = document.getElementById('generateIcon');
+            playBtn = document.getElementById('playBtn');
+            pauseBtn = document.getElementById('pauseBtn');
+            replayBtn = document.getElementById('replayBtn');
+            downloadMp3Btn = document.getElementById('downloadMp3Btn');
+            downloadBtnText = document.getElementById('downloadBtnText');
+
+            speedSlider = document.getElementById('speedSlider');
+            pitchSlider = document.getElementById('pitchSlider');
+            volumeSlider = document.getElementById('volumeSlider');
+            speedValueLabel = document.getElementById('speedValueLabel');
+            pitchValueLabel = document.getElementById('pitchValueLabel');
+            volumeValueLabel = document.getElementById('volumeValueLabel');
+
+            waveformCanvas = document.getElementById('waveformCanvas');
+            emptyPlayerOverlay = document.getElementById('emptyPlayerOverlay');
+            timeDisplay = document.getElementById('timeDisplay');
+            activeVoiceTag = document.getElementById('activeVoiceTag');
+            voiceCharacterList = document.getElementById('voiceCharacterList');
+            audioElement = document.getElementById('ttsAudioElement');
+
+            if (waveformCanvas) {
+                canvasCtx = waveformCanvas.getContext('2d');
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+            }
+
+            renderVoiceCharacters();
+            updateCharCount();
+
+            ttsInput.addEventListener('input', updateCharCount);
+
+            speedSlider.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                let desc = 'Natural Murni';
+                if (val < 0.96) desc = 'Santai';
+                else if (val > 1.04) desc = 'Cepat';
+                speedValueLabel.textContent = `${val.toFixed(2)}x (${desc})`;
+                applyPlaybackSpeed(val);
+            });
+
+            pitchSlider.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                const sign = val > 0 ? '+' : '';
+                pitchValueLabel.textContent = `${sign}${val.toFixed(1)} st (${val === 0 ? 'Murni' : 'Custom'})`;
+            });
+
+            pitchSlider.addEventListener('change', () => {
+                rebuildAudioWithPitchShift();
+            });
+
+            volumeSlider.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                volumeValueLabel.textContent = `${Math.round(val * 100)}%`;
+                if (audioElement) audioElement.volume = val;
+            });
+
+            const seekSlider = document.getElementById('seekSlider');
+            seekSlider.addEventListener('input', (e) => {
+                if (!audioElement || !audioElement.duration) return;
+                const pct = parseFloat(e.target.value) / 100;
+                audioElement.currentTime = pct * audioElement.duration;
+                updateTimeUI();
+            });
+
+            audioElement.addEventListener('timeupdate', () => {
+                updateTimeUI();
+                if (audioElement.duration) {
+                    seekSlider.value = ((audioElement.currentTime / audioElement.duration) * 100).toFixed(1);
+                }
+            });
+
+            audioElement.addEventListener('ended', () => {
+                playBtn.classList.remove('ring-2', 'ring-blue-400');
+                drawIdleWaveform();
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
